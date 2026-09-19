@@ -33,21 +33,45 @@ Local:   http://localhost:5173/
 Network: http://192.168.1.23:5173/
 ```
 
-## Open it on your phone
+## Open it on your phone (no computer needed)
 
-1. Make sure your phone is on the **same Wi-Fi network** as the machine
-   running `npm run dev`.
-2. Open the `Network` URL Vite printed (the `http://<ip>:5173` one) in your
-   phone's browser.
-3. If this is running inside a cloud/remote sandbox (not your own machine),
-   the phone can't reach it directly over Wi-Fi — you'll need to either run
-   it locally on a machine on your network, or deploy it somewhere public
-   (say the word and this can be set up next).
+The app is also published to **GitHub Pages** so it's reachable from Safari
+on your iPhone directly, no dev server required:
+
+**https://samzeidi.github.io/Aufgabe1/**
+
+One-time setup (only needed once, from Safari on your iPhone or any browser,
+by whoever owns the `samzeidi/Aufgabe1` repo):
+
+1. Go to `github.com/samzeidi/Aufgabe1` → **Settings** → **Pages** (left
+   sidebar).
+2. Under "Build and deployment" → **Source**, choose **Deploy from a
+   branch**.
+3. Branch: **gh-pages**, folder **/ (root)** → **Save**.
+4. Wait ~1 minute, then open the URL above.
+
+Because this is served over `https://`, the service worker also works here,
+so the app caches itself for real offline use after the first visit.
+
+Every time the app is updated, the `gh-pages` branch gets rebuilt and
+re-pushed with the new build (already the case for the current version) —
+no re-setup needed on your end.
+
+### Local dev (optional, needs a computer)
+
+```bash
+cd room-planner
+npm install
+npm run dev
+```
+
+Vite prints a `Network` URL you can also open from a phone on the same
+Wi-Fi, if you ever want to iterate locally instead.
 
 ## Install it on your iPhone (no App Store)
 
-Once you have the app open in **Safari** on your iPhone (using the `Network`
-URL above, both devices on the same Wi-Fi):
+Once you have the app open in **Safari** on your iPhone (either the GitHub
+Pages URL above, or a local `Network` URL):
 
 1. Tap the **Share** button (square with an arrow, in the bottom toolbar).
 2. Scroll down and tap **Add to Home Screen**.
@@ -55,13 +79,6 @@ URL above, both devices on the same Wi-Fi):
 
 A "Room Planner" icon appears on your home screen. Opening it launches the
 app full-screen, no browser chrome — just like a native app.
-
-**Note on offline support:** because this runs over a plain local `http://`
-address rather than `https://`, the offline caching part (service worker)
-won't activate in Safari — that only works over HTTPS or `localhost`. The
-home screen icon and full-screen app experience work regardless. If you want
-real offline support too, this needs to be served over HTTPS (e.g. via a
-public deployment) — ask if you'd like that set up.
 
 ## Next steps
 
