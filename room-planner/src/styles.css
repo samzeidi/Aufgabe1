@@ -195,3 +195,111 @@ input[type="checkbox"] {
   line-height: 1.4;
   margin: 0;
 }
+
+.view-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.view-button {
+  all: unset;
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--border);
+  color: var(--text);
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.view-button.active {
+  background: var(--accent);
+  color: white;
+}
+
+.hint {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.badge {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.badge.ok {
+  background: #1f4d2e;
+  color: #9be7b0;
+}
+
+.badge.bad {
+  background: #5a1f1f;
+  color: #ffb3b3;
+}
+
+.check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.82rem;
+}
+
+.check-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.check-list li:last-child {
+  border-bottom: none;
+}
+
+.check-list li.ok .check-value::before {
+  content: "✓ ";
+  color: #9be7b0;
+}
+
+.check-list li.bad .check-value::before {
+  content: "✗ ";
+  color: #ffb3b3;
+}
+
+.check-label {
+  color: var(--text-dim);
+}
+
+.check-value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.check-expected {
+  color: #ffb3b3;
+}
+
+.dim-label {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1b1f27;
+  border: 1px solid #ff6a3d;
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.dim-label.accent {
+  background: rgba(27, 31, 39, 0.9);
+  color: #fff;
+  border-color: #5b8cff;
+}

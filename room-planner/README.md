@@ -1,22 +1,54 @@
 # Room Planner
 
-Phase 1: a basic 3D room you can size and walk around, viewable on your phone.
-Later phases will add uploaded measurements/photos and let you place real
-products (as 3D assets) inside the room.
+A 1:1 digital twin of the main living/sleeping/kitchen room, reconstructed
+from the hand-drawn floor plan and the room photos (see `renders/` for the
+check renders). The next phase adds uploaded products placed inside it.
 
-## What's here now
+## The reconstruction
 
-- A 3D room (floor, back/left/right walls, optional ceiling) built from
-  width/depth/height you control with sliders.
-- Touch-friendly orbit/zoom/pan camera (works with one/two-finger gestures).
-- Unit toggle (meters/feet), wall opacity (to see inside easier), floor grid
-  and ceiling toggles.
-- Settings are saved in the browser (`localStorage`), so they persist between
-  visits on the same device.
-- A "Products" section in the panel as a placeholder for the next phase.
+Everything is parametric: every dimension lives in `src/room/params.ts` in
+centimeters, in the coordinate system from the brief (origin at the
+bottom-left corner, X across the 400 cm wall, Y toward the kitchen, Z up).
+`src/room/validate.ts` re-checks the measured numbers and the panel shows the
+result ("Measurement check").
+
+Measured (authoritative): room 400 × 624 × 243; window wall sequence from the
+bed wall 107 / 127 / 131 / 127 / 132; windows 127 × 225; kitchen 285 long
+starting 110 from the window wall (so it ends at 395); right solid wall 305;
+bed 140 × 200; table Ø110; sofa 150; shelves 36 × 30.
+
+Inferred from the photos: kitchen module sequence (sink 60 · open niche 60 ·
+oven+cooktop 60 · drawer unit 45 · tall unit 60), upper cabinets 145–212 cm
+with the hood + frosted cabinet over the cooktop, counter at 90, tall unit to
+228; bed toward the right side of the bed wall (X 230–370); sofa with its back
+to the kitchen; the diagonal wall return beside the kitchen carrying the
+light switches; the entrance nook with the white bathroom door, simplified.
+Floor planks run along X (the 400 cm direction) because that is what every
+photo shows.
+
+Views in the panel jump to the reference-photo positions (pages 6/7, 10/11,
+12, 14/15) plus an overview and a dimensioned top-down plan. Lens buttons
+switch between the phone ultrawide (14 mm), the phone main camera (24 mm)
+and a normal 35 mm.
+
+- Touch-friendly orbit/zoom/pan camera (one/two-finger gestures).
+- Wall opacity slider to look inside from the overview.
+- Settings persist in the browser (`localStorage`).
 - Installable as an app: it's a PWA (manifest + service worker + app icon),
   so it can be added to your iPhone home screen and launched full-screen like
   a real app — no App Store needed.
+
+### Check renders
+
+`renders/` holds the validation set: plain and dimensioned top-down plans and
+the four photo-matching perspectives, all at 14 mm to match the phone photos.
+Regenerate them after a change with:
+
+```bash
+npm run build
+npx playwright install chromium   # once
+npm run render:checks
+```
 
 ## Run it
 

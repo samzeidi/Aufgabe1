@@ -1,23 +1,33 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { PlacedProduct, RoomSettings, Unit } from "../types";
+import type { Lens, PlacedProduct, RoomSettings, Unit, ViewId } from "../types";
 
 const DEFAULT_SETTINGS: RoomSettings = {
-  dimensions: { width: 4, depth: 5, height: 2.5 },
   unit: "m",
   wallOpacity: 1,
-  showCeiling: false,
-  showGrid: true,
+  showCeiling: true,
+  showDimensions: false,
+  showExterior: true,
+  lens: 24,
 };
+
+const VIEW_IDS: ViewId[] = ["overview", "top", "kitchen", "bed", "table", "kitchenAlong"];
+
+function initialView(): ViewId {
+  if (typeof window === "undefined") return "kitchen";
+  const v = new URLSearchParams(window.location.search).get("view");
+  return VIEW_IDS.includes(v as ViewId) ? (v as ViewId) : "kitchen";
+}
 
 interface RoomStore {
   settings: RoomSettings;
+  view: ViewId;
   products: PlacedProduct[];
-  setDimension: (key: keyof RoomSettings["dimensions"], value: number) => void;
+  setView: (view: ViewId) => void;
   setUnit: (unit: Unit) => void;
+  setLens: (lens: Lens) => void;
   setWallOpacity: (value: number) => void;
-  toggleCeiling: () => void;
-  toggleGrid: () => void;
+  toggle: (key: "showCeiling" | "showDimensions" | "showExterior") => void;
   reset: () => void;
 }
 
@@ -25,28 +35,30 @@ export const useRoomStore = create<RoomStore>()(
   persist(
     (set) => ({
       settings: DEFAULT_SETTINGS,
+      view: initialView(),
       products: [],
-      setDimension: (key, value) =>
-        set((state) => ({
-          settings: {
-            ...state.settings,
-            dimensions: { ...state.settings.dimensions, [key]: value },
-          },
-        })),
-      setUnit: (unit) =>
-        set((state) => ({ settings: { ...state.settings, unit } })),
+      setView: (view) => set({ view }),
+      setUnit: (unit) => set((s) => ({ settings: { ...s.settings, unit } })),
+      setLens: (lens) => set((s) => ({ settings: { ...s.settings, lens } })),
       setWallOpacity: (value) =>
-        set((state) => ({ settings: { ...state.settings, wallOpacity: value } })),
-      toggleCeiling: () =>
-        set((state) => ({
-          settings: { ...state.settings, showCeiling: !state.settings.showCeiling },
-        })),
-      toggleGrid: () =>
-        set((state) => ({
-          settings: { ...state.settings, showGrid: !state.settings.showGrid },
-        })),
+        set((s) => ({ settings: { ...s.settings, wallOpacity: value } })),
+      toggle: (key) =>
+        set((s) => ({ settings: { ...s.settings, [key]: !s.settings[key] } })),
       reset: () => set({ settings: DEFAULT_SETTINGS }),
     }),
-    { name: "room-planner-settings" },
+    {
+      name: "room-planner-v2",
+      partialize: (s) => ({ settings: s.settings, products: s.products }),
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<RoomStore>;
+        return {
+          ...current,
+          ...p,
+          settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) },
+          // a ?view= URL parameter always wins over the persisted view
+          view: current.view,
+        };
+      },
+    },
   ),
 );

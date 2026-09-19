@@ -1,41 +1,45 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import * as THREE from "three";
 import { useRoomStore } from "../store/useRoomStore";
-import { RoomModel } from "./RoomModel";
+import { MaterialsProvider } from "../room/materials";
+import { CameraRig } from "./CameraRig";
+import { Shell } from "./room/Shell";
+import { Windows } from "./room/Windows";
+import { Kitchen } from "./room/Kitchen";
+import { Furniture } from "./room/Furniture";
+import { Lighting } from "./room/Lighting";
+import { Exterior } from "./room/Exterior";
+import { Dimensions } from "./room/Dimensions";
+
+// ?dims=0 suppresses the dimension overlay even in the top view (plain plan render)
+const dimsSuppressed = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("dims") === "0";
 
 export function Scene() {
-  const dimensions = useRoomStore((state) => state.settings.dimensions);
-  const target: [number, number, number] = [0, dimensions.height / 2, 0];
-  const camDistance = Math.max(dimensions.width, dimensions.depth) * 1.3 + 2;
+  const settings = useRoomStore((s) => s.settings);
+  const view = useRoomStore((s) => s.view);
+  const planView = view === "top" || view === "overview";
+  const showCeiling = settings.showCeiling && !planView;
+  const showExterior = settings.showExterior && !planView;
+  const showDimensions = !dimsSuppressed && (settings.showDimensions || view === "top");
 
   return (
-    <Canvas shadows dpr={[1, 2]} style={{ touchAction: "none" }}>
-      <PerspectiveCamera
-        makeDefault
-        position={[camDistance * 0.7, dimensions.height * 1.1 + 1, camDistance * 0.9]}
-        fov={55}
-        near={0.1}
-        far={100}
-      />
-      <OrbitControls
-        target={target}
-        enableDamping
-        dampingFactor={0.12}
-        minDistance={1}
-        maxDistance={30}
-        maxPolarAngle={Math.PI / 2 - 0.02}
-      />
-
-      <ambientLight intensity={0.6} />
-      <directionalLight
-        position={[dimensions.width, dimensions.height * 3, dimensions.depth]}
-        intensity={1.1}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-      />
-      <hemisphereLight args={["#e8f0ff", "#3a3529", 0.4]} />
-
-      <RoomModel />
+    <Canvas
+      shadows
+      dpr={[1, 1.75]}
+      gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
+      style={{ touchAction: "none" }}
+    >
+      <color attach="background" args={["#c9d4de"]} />
+      <MaterialsProvider>
+        <CameraRig view={view} lens={settings.lens} />
+        <Lighting />
+        <Shell wallOpacity={settings.wallOpacity} showCeiling={showCeiling} />
+        <Windows />
+        <Kitchen />
+        <Furniture />
+        {showExterior && <Exterior />}
+        {showDimensions && <Dimensions />}
+      </MaterialsProvider>
     </Canvas>
   );
 }

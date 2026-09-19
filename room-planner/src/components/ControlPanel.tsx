@@ -1,51 +1,21 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRoomStore } from "../store/useRoomStore";
-import { displayToMeters, metersToDisplay } from "../units";
-import type { Unit } from "../types";
+import { runChecks } from "../room/validate";
+import { VIEW_LABELS } from "./CameraRig";
+import type { Lens, ViewId } from "../types";
 
-const LIMITS = {
-  width: { min: 1, max: 15, step: 0.1 },
-  depth: { min: 1, max: 15, step: 0.1 },
-  height: { min: 2, max: 5, step: 0.05 },
-};
+const VIEW_ORDER: ViewId[] = ["kitchen", "bed", "table", "kitchenAlong", "overview", "top"];
 
 export function ControlPanel() {
   const [expanded, setExpanded] = useState(true);
-  const settings = useRoomStore((state) => state.settings);
-  const setDimension = useRoomStore((state) => state.setDimension);
-  const setUnit = useRoomStore((state) => state.setUnit);
-  const setWallOpacity = useRoomStore((state) => state.setWallOpacity);
-  const toggleCeiling = useRoomStore((state) => state.toggleCeiling);
-  const toggleGrid = useRoomStore((state) => state.toggleGrid);
-  const reset = useRoomStore((state) => state.reset);
-
-  const { unit } = settings;
-
-  const dimensionRow = (key: keyof typeof LIMITS, label: string) => {
-    const meters = settings.dimensions[key];
-    const displayValue = metersToDisplay(meters, unit);
-    const limits = LIMITS[key];
-    return (
-      <div className="control-row" key={key}>
-        <div className="control-row-label">
-          <span>{label}</span>
-          <span className="control-row-value">
-            {displayValue.toFixed(2)} {unit}
-          </span>
-        </div>
-        <input
-          type="range"
-          min={metersToDisplay(limits.min, unit)}
-          max={metersToDisplay(limits.max, unit)}
-          step={limits.step}
-          value={displayValue}
-          onChange={(e) =>
-            setDimension(key, displayToMeters(Number(e.target.value), unit))
-          }
-        />
-      </div>
-    );
-  };
+  const settings = useRoomStore((s) => s.settings);
+  const view = useRoomStore((s) => s.view);
+  const setView = useRoomStore((s) => s.setView);
+  const setLens = useRoomStore((s) => s.setLens);
+  const setWallOpacity = useRoomStore((s) => s.setWallOpacity);
+  const toggle = useRoomStore((s) => s.toggle);
+  const checks = useMemo(() => runChecks(), []);
+  const allOk = checks.every((c) => c.ok);
 
   return (
     <div className={`control-panel ${expanded ? "expanded" : "collapsed"}`}>
@@ -55,39 +25,38 @@ export function ControlPanel() {
         aria-label={expanded ? "Collapse controls" : "Expand controls"}
       >
         <span className="handle-bar" />
-        <span>{expanded ? "Hide room settings" : "Room settings"}</span>
+        <span>{expanded ? "Hide controls" : "Views & settings"}</span>
       </button>
 
       {expanded && (
         <div className="control-panel-body">
           <div className="control-section">
             <div className="section-title-row">
-              <h2>Room dimensions</h2>
+              <h2>Views</h2>
               <div className="unit-toggle">
-                {(["m", "ft"] as Unit[]).map((u) => (
-                  <button
-                    key={u}
-                    className={u === unit ? "active" : ""}
-                    onClick={() => setUnit(u)}
-                  >
-                    {u}
+                {([14, 24, 35] as Lens[]).map((l) => (
+                  <button key={l} className={l === settings.lens ? "active" : ""} onClick={() => setLens(l)}>
+                    {l} mm
                   </button>
                 ))}
               </div>
             </div>
-            {dimensionRow("width", "Width")}
-            {dimensionRow("depth", "Depth")}
-            {dimensionRow("height", "Height")}
+            <div className="view-grid">
+              {VIEW_ORDER.map((id) => (
+                <button key={id} className={`view-button ${id === view ? "active" : ""}`} onClick={() => setView(id)}>
+                  {VIEW_LABELS[id]}
+                </button>
+              ))}
+            </div>
+            <p className="hint">Drag to look around, pinch to zoom, two fingers to pan. Pick a view to jump back.</p>
           </div>
 
           <div className="control-section">
-            <h2>View</h2>
+            <h2>Display</h2>
             <div className="control-row">
               <div className="control-row-label">
                 <span>Wall opacity</span>
-                <span className="control-row-value">
-                  {Math.round(settings.wallOpacity * 100)}%
-                </span>
+                <span className="control-row-value">{Math.round(settings.wallOpacity * 100)}%</span>
               </div>
               <input
                 type="range"
@@ -100,32 +69,42 @@ export function ControlPanel() {
             </div>
             <div className="toggle-row">
               <label>
-                <input
-                  type="checkbox"
-                  checked={settings.showCeiling}
-                  onChange={toggleCeiling}
-                />
-                Show ceiling
+                <input type="checkbox" checked={settings.showCeiling} onChange={() => toggle("showCeiling")} />
+                Ceiling (auto-hidden in top/overview)
               </label>
               <label>
-                <input
-                  type="checkbox"
-                  checked={settings.showGrid}
-                  onChange={toggleGrid}
-                />
-                Show floor grid
+                <input type="checkbox" checked={settings.showDimensions} onChange={() => toggle("showDimensions")} />
+                Dimension labels (always on in top-down)
+              </label>
+              <label>
+                <input type="checkbox" checked={settings.showExterior} onChange={() => toggle("showExterior")} />
+                Balcony & street outside (auto-hidden in top/overview)
               </label>
             </div>
-            <button className="reset-button" onClick={reset}>
-              Reset to defaults
-            </button>
+          </div>
+
+          <div className="control-section">
+            <div className="section-title-row">
+              <h2>Measurement check</h2>
+              <span className={`badge ${allOk ? "ok" : "bad"}`}>{allOk ? "all pass" : "mismatch"}</span>
+            </div>
+            <ul className="check-list">
+              {checks.map((c) => (
+                <li key={c.label} className={c.ok ? "ok" : "bad"}>
+                  <span className="check-label">{c.label}</span>
+                  <span className="check-value">
+                    {c.actual}
+                    {c.actual !== c.expected && <span className="check-expected"> (expected {c.expected})</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="control-section products-section">
             <h2>Products</h2>
             <p className="coming-soon">
-              Next step: upload your room photos, exact measurements, and
-              product models here to place them inside this room.
+              Next step: upload product photos/models and place them inside this room at true scale.
             </p>
           </div>
         </div>
