@@ -49,7 +49,7 @@ function std(props: THREE.MeshStandardMaterialParameters) {
 export function createMaterials() {
   const floorTex = oakFloorTexture(P.NOOK_X1, P.ROOM_L);
   const wallTex = plasterTexture(PALETTE.wall, 400, 243);
-  const ceilingTex = plasterTexture(PALETTE.ceiling, 400, 624);
+  const ceilingTex = plasterTexture("#E2DFD8", 400, 624);
   const tileTex = kitchenTileTexture(P.KITCHEN_W, P.UPPER_Z0 - P.COUNTER_H);
   const stripTex = tileStripTexture(P.KITCHEN_W);
   const beech = beechTexture();
@@ -74,10 +74,11 @@ export function createMaterials() {
     ceiling: std({ map: ceilingTex, roughness: 0.9, metalness: 0, side: THREE.DoubleSide }),
     baseboard: std({ color: PALETTE.baseboard, roughness: 0.6 }),
     cabinet: std({ map: beech, color: "#ffffff", roughness: 0.45, metalness: 0 }),
-    cabinetCarcass: std({ color: "#8f6a45", roughness: 0.6 }),
+    cabinetField: std({ map: beech, color: "#e6dfd6", roughness: 0.47, metalness: 0 }),
+    cabinetCarcass: std({ color: "#A27A50", roughness: 0.6 }),
     nicheInterior: std({ color: "#5a4a3a", roughness: 0.9 }),
     plinth: std({ color: PALETTE.plinth, roughness: 0.7 }),
-    counter: std({ color: PALETTE.counter, roughness: 0.35, metalness: 0.05 }),
+    counter: std({ color: "#5E5954", roughness: 0.55, metalness: 0.05 }),
     tile: std({ map: tileTex, roughness: 0.35, metalness: 0 }),
     tileStrip: std({ map: stripTex, roughness: 0.4 }),
     steel: std({ color: PALETTE.steel, roughness: 0.23, metalness: 0.85 }),
@@ -89,13 +90,13 @@ export function createMaterials() {
     windowFrame: std({ color: PALETTE.windowFrame, roughness: 0.3, metalness: 0.1 }),
     glass,
     blind: std({ color: PALETTE.blind, roughness: 0.6 }),
-    bedFrame: std({ color: PALETTE.bedFrame, roughness: 0.5, metalness: 0.05 }),
-    bedPanel: std({ color: "#2A211C", roughness: 0.55 }),
-    mattress: std({ color: PALETTE.mattress, roughness: 0.9 }),
-    sofa: std({ color: PALETTE.sofa, roughness: 0.8 }),
-    sofaDark: std({ color: "#948870", roughness: 0.82 }),
-    table: std({ color: PALETTE.table, roughness: 0.5 }),
-    shelf: std({ color: PALETTE.shelf, roughness: 0.6 }),
+    bedFrame: std({ color: "#231C19", roughness: 0.45, metalness: 0.15 }),
+    bedPanel: std({ color: "#3A322C", roughness: 0.6 }),
+    mattress: std({ color: "#E9E5DE", roughness: 0.9 }),
+    sofa: std({ color: "#B7AC95", roughness: 0.8 }),
+    sofaDark: std({ color: "#A69B84", roughness: 0.82 }),
+    table: std({ color: "#C4B59C", roughness: 0.5 }),
+    shelf: std({ color: "#B08F68", roughness: 0.6 }),
     lamp: std({
       color: PALETTE.lamp,
       emissive: "#FFE2B0",

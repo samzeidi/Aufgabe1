@@ -77,7 +77,7 @@ function Door({
       <Block
         min={[x0 + f, y - P.FRONT_T - 0.4, z0 + f]}
         size={[x1 - x0 - 2 * f, 0.4, z1 - z0 - 2 * f]}
-        material={mats.cabinetCarcass}
+        material={mats.cabinetField}
         castShadow={false}
       />
     </group>

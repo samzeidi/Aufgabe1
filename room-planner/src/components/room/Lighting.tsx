@@ -28,8 +28,8 @@ export function Lighting() {
         shadow-camera-near={1}
         shadow-camera-far={30}
       />
-      <hemisphereLight args={["#e3e9f0", "#6f6455", 0.7]} />
-      <ambientLight intensity={0.4} />
+      <hemisphereLight args={["#e3e9f0", "#7a7268", 0.7]} />
+      <ambientLight intensity={0.34} />
 
       {/* white paper pendant in the sleeping half */}
       <mesh position={toWorld(x, y, P.ROOM_H - 1)} material={mats.lampCord} castShadow={false}>
@@ -41,13 +41,13 @@ export function Lighting() {
       <mesh position={toWorld(x, y, centerZ)} material={mats.lamp} castShadow={false}>
         <sphereGeometry args={[diameter / 200, 32, 24]} />
       </mesh>
-      <pointLight position={toWorld(x, y, centerZ)} intensity={11} color="#ffd8a6" decay={2} castShadow={false} />
+      <pointLight position={toWorld(x, y, centerZ)} intensity={8} color="#ffe4c4" decay={2} castShadow={false} />
 
       {/* understated flush fixture toward the kitchen */}
       <mesh position={toWorld(P.KITCHEN_LIGHT.x, P.KITCHEN_LIGHT.y, P.ROOM_H - 2)} material={mats.lamp} castShadow={false}>
         <cylinderGeometry args={[0.11, 0.13, 0.04, 32]} />
       </mesh>
-      <pointLight position={toWorld(P.KITCHEN_LIGHT.x, P.KITCHEN_LIGHT.y, P.ROOM_H - 45)} intensity={4} color="#ffe2b8" decay={2} />
+      <pointLight position={toWorld(P.KITCHEN_LIGHT.x, P.KITCHEN_LIGHT.y, P.ROOM_H - 45)} intensity={4} color="#fff0dc" decay={2} />
     </group>
   );
 }

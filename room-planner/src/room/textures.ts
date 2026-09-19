@@ -32,7 +32,8 @@ export function oakFloorTexture(sizeUcm: number, sizeVcm: number) {
   const px = 1024;
   const { c, ctx } = canvas(px, px);
   const rnd = mulberry32(7);
-  const tones = ["#C1A47D", "#AF916C", "#AD8C66", "#B8997A", "#927454", "#B39470"];
+  // light oak, low saturation: calibrated against pages 10/11 relative to the wall tone
+  const tones = ["#D6BA9E", "#CDAF92", "#C6A88B", "#BE9F82", "#B3937A", "#D0B497"];
   const plankH = px / 10; // 20 cm planks
   for (let row = 0; row < 10; row++) {
     let u = -rnd() * px * 0.6;
@@ -41,19 +42,19 @@ export function oakFloorTexture(sizeUcm: number, sizeVcm: number) {
       ctx.fillStyle = tones[Math.floor(rnd() * tones.length)];
       ctx.fillRect(u, row * plankH, len, plankH);
       // soft grain streaks
-      ctx.globalAlpha = 0.08;
+      ctx.globalAlpha = 0.06;
       for (let g = 0; g < 14; g++) {
-        ctx.fillStyle = rnd() > 0.5 ? "#7a5c3c" : "#e0c9a6";
+        ctx.fillStyle = rnd() > 0.5 ? "#8a6d50" : "#eadbc4";
         const gy = row * plankH + rnd() * plankH;
         ctx.fillRect(u, gy, len, 1 + rnd() * 2);
       }
       ctx.globalAlpha = 1;
       // seams
-      ctx.fillStyle = "rgba(60,40,25,0.35)";
+      ctx.fillStyle = "rgba(70,50,35,0.28)";
       ctx.fillRect(u, row * plankH, 2, plankH);
       u += len;
     }
-    ctx.fillStyle = "rgba(60,40,25,0.30)";
+    ctx.fillStyle = "rgba(70,50,35,0.24)";
     ctx.fillRect(0, row * plankH, px, 2);
   }
   return finish(c, sizeUcm / 200, sizeVcm / 200);
@@ -64,15 +65,15 @@ export function kitchenTileTexture(sizeUcm: number, sizeVcm: number) {
   const px = 512;
   const { c, ctx } = canvas(px, px);
   const rnd = mulberry32(3);
-  ctx.fillStyle = "#B8B3A9";
+  ctx.fillStyle = "#C4BEB2";
   ctx.fillRect(0, 0, px, px);
   const n = 10;
   const t = px / n;
   const grout = 3;
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
-      const v = 0.94 + rnd() * 0.08;
-      ctx.fillStyle = `rgb(${Math.round(221 * v)},${Math.round(215 * v)},${Math.round(202 * v)})`;
+      const v = 0.95 + rnd() * 0.06;
+      ctx.fillStyle = `rgb(${Math.round(232 * v)},${Math.round(226 * v)},${Math.round(210 * v)})`;
       ctx.fillRect(i * t + grout / 2, j * t + grout / 2, t - grout, t - grout);
     }
   }
@@ -121,11 +122,12 @@ export function beechTexture() {
   const px = 512;
   const { c, ctx } = canvas(px, px);
   const rnd = mulberry32(5);
-  ctx.fillStyle = "#A97848";
+  // beech: yellow-tan, calibrated against pages 6/7/14
+  ctx.fillStyle = "#C09A6C";
   ctx.fillRect(0, 0, px, px);
-  const tones = ["#93683E", "#B88959", "#C09567", "#A57346", "#B07E4E"];
+  const tones = ["#AE8A5E", "#C9A575", "#D1AF82", "#B69064", "#C49F70"];
   for (let i = 0; i < 260; i++) {
-    ctx.globalAlpha = 0.18 + rnd() * 0.25;
+    ctx.globalAlpha = 0.15 + rnd() * 0.22;
     ctx.fillStyle = tones[Math.floor(rnd() * tones.length)];
     const x = rnd() * px;
     ctx.fillRect(x, 0, 1 + rnd() * 5, px);

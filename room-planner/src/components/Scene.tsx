@@ -26,7 +26,7 @@ export function Scene() {
     <Canvas
       shadows
       dpr={[1, 1.75]}
-      gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
+      gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.95 }}
       style={{ touchAction: "none" }}
     >
       <color attach="background" args={["#c9d4de"]} />
