@@ -14,6 +14,9 @@ products (as 3D assets) inside the room.
 - Settings are saved in the browser (`localStorage`), so they persist between
   visits on the same device.
 - A "Products" section in the panel as a placeholder for the next phase.
+- Installable as an app: it's a PWA (manifest + service worker + app icon),
+  so it can be added to your iPhone home screen and launched full-screen like
+  a real app — no App Store needed.
 
 ## Run it
 
@@ -40,6 +43,25 @@ Network: http://192.168.1.23:5173/
    the phone can't reach it directly over Wi-Fi — you'll need to either run
    it locally on a machine on your network, or deploy it somewhere public
    (say the word and this can be set up next).
+
+## Install it on your iPhone (no App Store)
+
+Once you have the app open in **Safari** on your iPhone (using the `Network`
+URL above, both devices on the same Wi-Fi):
+
+1. Tap the **Share** button (square with an arrow, in the bottom toolbar).
+2. Scroll down and tap **Add to Home Screen**.
+3. Tap **Add** (top right).
+
+A "Room Planner" icon appears on your home screen. Opening it launches the
+app full-screen, no browser chrome — just like a native app.
+
+**Note on offline support:** because this runs over a plain local `http://`
+address rather than `https://`, the offline caching part (service worker)
+won't activate in Safari — that only works over HTTPS or `localhost`. The
+home screen icon and full-screen app experience work regardless. If you want
+real offline support too, this needs to be served over HTTPS (e.g. via a
+public deployment) — ask if you'd like that set up.
 
 ## Next steps
 
