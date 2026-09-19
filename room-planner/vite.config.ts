@@ -2,7 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+// GitHub Pages serves this app from https://<user>.github.io/<repo>/,
+// so assets need that repo-name prefix only for the Pages build.
+const base = process.env.GH_PAGES === "true" ? "/Aufgabe1/" : "/";
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -12,8 +17,8 @@ export default defineConfig({
         name: "Room Planner",
         short_name: "Room Planner",
         description: "Plan your room in 3D and place products inside it.",
-        start_url: "/",
-        scope: "/",
+        start_url: ".",
+        scope: ".",
         display: "standalone",
         orientation: "any",
         background_color: "#111318",
