@@ -1,0 +1,259 @@
+import type { DesignColors, DesignStyles } from "./design";
+
+export interface Template {
+  id: string;
+  name: string;
+  vibe: string;
+  /** the three chips shown on the card */
+  chips: [string, string, string];
+  colors: DesignColors;
+  styles: Partial<DesignStyles>;
+}
+
+const base: DesignStyles = {
+  accentWall: true,
+  sofa: "existing",
+  bed: "existing",
+  rug: "jute",
+  curtains: "linen",
+  plants: true,
+  art: true,
+};
+
+export const DEFAULT_STYLES: DesignStyles = base;
+
+/**
+ * Ten green-and-brown looks. Colours are taken from the mood boards
+ * (the "cosy autumn" card gives #6B7A64 · #8A907F · #E6D8C9 · #A67A52 ·
+ * #3E4639 · #C9B8A2) and kept in that family.
+ */
+export const TEMPLATES: Template[] = [
+  {
+    id: "as-is",
+    name: "As it is now",
+    vibe: "The real flat, untouched — white walls, your own furniture.",
+    chips: ["#F1EEE5", "#B7AC95", "#C6A88B"],
+    colors: {
+      wall: "#F1EEE5",
+      accentWall: "#F1EEE5",
+      ceiling: "#E2DFD8",
+      sofa: "#B7AC95",
+      cushions: "#9E937E",
+      bedding: "#E9E5DE",
+      throwBlanket: "#C9BFA9",
+      rug: "#C9B8A2",
+      curtains: "#E6E1D6",
+      art: "#8A907F",
+    },
+    styles: { ...base, accentWall: false, rug: "none", curtains: "none", plants: false, art: false },
+  },
+  {
+    id: "cosy-autumn",
+    name: "Cosy Autumn Sage",
+    vibe: "The mood-board palette: sage walls, cognac sofa, cream bedding.",
+    chips: ["#8A907F", "#A67A52", "#E6D8C9"],
+    colors: {
+      wall: "#A9AE9C",
+      accentWall: "#6B7A64",
+      ceiling: "#EDEAE1",
+      sofa: "#A67A52",
+      cushions: "#3E4639",
+      bedding: "#E6D8C9",
+      throwBlanket: "#C9B8A2",
+      rug: "#C9B8A2",
+      curtains: "#6B7A64",
+      art: "#3E4639",
+    },
+    styles: { ...base, sofa: "loveseat", curtains: "velvet" },
+  },
+  {
+    id: "sage-linen",
+    name: "Sage & Linen",
+    vibe: "Soft and light. Pale sage walls, cream sofa, jute rug.",
+    chips: ["#AFB8A4", "#E3DACB", "#C9B8A2"],
+    colors: {
+      wall: "#C3C9B9",
+      accentWall: "#9AA48D",
+      ceiling: "#F2F0E9",
+      sofa: "#E3DACB",
+      cushions: "#8A907F",
+      bedding: "#F2EEE5",
+      throwBlanket: "#AFB8A4",
+      rug: "#CBBBA0",
+      curtains: "#EDE6D8",
+      art: "#7C8A74",
+    },
+    styles: { ...base, sofa: "loveseat" },
+  },
+  {
+    id: "forest-cognac",
+    name: "Forest & Cognac",
+    vibe: "Deep green walls with a tan leather sofa. Warm and dramatic.",
+    chips: ["#3E4639", "#A0623A", "#E8E2D6"],
+    colors: {
+      wall: "#4A5344",
+      accentWall: "#323B2E",
+      ceiling: "#E8E6DE",
+      sofa: "#A0623A",
+      cushions: "#26302A",
+      bedding: "#E8E2D6",
+      throwBlanket: "#8B9480",
+      rug: "#B3A68A",
+      curtains: "#3E4639",
+      art: "#C9B8A2",
+    },
+    styles: { ...base, sofa: "chesterfield", curtains: "velvet", rug: "persian" },
+  },
+  {
+    id: "moss-sand",
+    name: "Moss & Sand",
+    vibe: "Moss green against warm sand. Plenty of plants.",
+    chips: ["#6F7A52", "#D8C9AE", "#8C7A5E"],
+    colors: {
+      wall: "#CFC5AC",
+      accentWall: "#6F7A52",
+      ceiling: "#F0EDE3",
+      sofa: "#CDBFA6",
+      cushions: "#6F7A52",
+      bedding: "#F0EADF",
+      throwBlanket: "#A8A07E",
+      rug: "#BCA886",
+      curtains: "#DED3BC",
+      art: "#5D6748",
+    },
+    styles: { ...base },
+  },
+  {
+    id: "emerald-walnut",
+    name: "Emerald & Walnut",
+    vibe: "Dark emerald with walnut brown and brass. Evening-ish.",
+    chips: ["#2F4A3F", "#7A4B2A", "#D9CDBA"],
+    colors: {
+      wall: "#3C5A4C",
+      accentWall: "#26382F",
+      ceiling: "#E6E4DC",
+      sofa: "#7A4B2A",
+      cushions: "#D9CDBA",
+      bedding: "#DED6C7",
+      throwBlanket: "#4F6B5C",
+      rug: "#8C7B63",
+      curtains: "#2F4A3F",
+      art: "#C2A25B",
+    },
+    styles: { ...base, sofa: "sectional", curtains: "velvet", rug: "persian" },
+  },
+  {
+    id: "terracotta-sage",
+    name: "Terracotta & Sage",
+    vibe: "Sage walls warmed up with terracotta and clay.",
+    chips: ["#B0B79F", "#B4674D", "#E8DCCB"],
+    colors: {
+      wall: "#BFC5AE",
+      accentWall: "#B4674D",
+      ceiling: "#F2EFE6",
+      sofa: "#D2A98C",
+      cushions: "#7E8A6E",
+      bedding: "#F0E8DA",
+      throwBlanket: "#B4674D",
+      rug: "#C7A98A",
+      curtains: "#E8DCCB",
+      art: "#8A5A42",
+    },
+    styles: { ...base, sofa: "loveseat" },
+  },
+  {
+    id: "mocha-sage",
+    name: "Mocha & Muted Sage",
+    vibe: "Mocha-mousse neutrals with a quiet sage accent wall.",
+    chips: ["#CDC4B4", "#7A8471", "#6F5B48"],
+    colors: {
+      wall: "#D3CABA",
+      accentWall: "#7A8471",
+      ceiling: "#F0EDE6",
+      sofa: "#6F5B48",
+      cushions: "#C4B49C",
+      bedding: "#EDE6DA",
+      throwBlanket: "#9CA78E",
+      rug: "#B7A488",
+      curtains: "#DCD3C2",
+      art: "#5A6151",
+    },
+    styles: { ...base, sofa: "loveseat", rug: "shag" },
+  },
+  {
+    id: "umber-fern",
+    name: "Deep Umber & Fern",
+    vibe: "The moodiest one. Dark umber walls, fern green, candles.",
+    chips: ["#4A4136", "#46543F", "#D8CBB6"],
+    colors: {
+      wall: "#574C40",
+      accentWall: "#46543F",
+      ceiling: "#DFDBD2",
+      sofa: "#8A6A4A",
+      cushions: "#46543F",
+      bedding: "#D8CBB6",
+      throwBlanket: "#6E7A5C",
+      rug: "#8A7A60",
+      curtains: "#46543F",
+      art: "#C2A25B",
+    },
+    styles: { ...base, sofa: "chesterfield", curtains: "velvet", rug: "persian" },
+  },
+  {
+    id: "almond-eucalyptus",
+    name: "Almond & Eucalyptus",
+    vibe: "Bright and airy. Almond walls, eucalyptus green, linen.",
+    chips: ["#E7DFD2", "#9FB0A2", "#C9B8A2"],
+    colors: {
+      wall: "#E7DFD2",
+      accentWall: "#9FB0A2",
+      ceiling: "#F4F2EC",
+      sofa: "#DCD3C2",
+      cushions: "#9FB0A2",
+      bedding: "#F4F1EA",
+      throwBlanket: "#B9C4B2",
+      rug: "#D0C0A4",
+      curtains: "#F0EBE0",
+      art: "#7E9184",
+    },
+    styles: { ...base, sofa: "loveseat" },
+  },
+  {
+    id: "olive-cream",
+    name: "Olive & Cream",
+    vibe: "Olive green with cream and light oak. Easy to live with.",
+    chips: ["#7E7F55", "#E3DACB", "#B08F68"],
+    colors: {
+      wall: "#B9B792",
+      accentWall: "#7E7F55",
+      ceiling: "#F1EEE5",
+      sofa: "#E3DACB",
+      cushions: "#7E7F55",
+      bedding: "#F2EEE4",
+      throwBlanket: "#A8A57C",
+      rug: "#C4B190",
+      curtains: "#E9E3D4",
+      art: "#6B6C46",
+    },
+    styles: { ...base, bed: "wood" },
+  },
+];
+
+export const DEFAULT_TEMPLATE = TEMPLATES[1];
+
+export function templateById(id: string): Template | undefined {
+  return TEMPLATES.find((t) => t.id === id);
+}
+
+export const COLOR_LABELS: Record<keyof DesignColors, string> = {
+  wall: "Walls",
+  accentWall: "Accent wall (behind the bed)",
+  ceiling: "Ceiling",
+  sofa: "Sofa",
+  cushions: "Cushions",
+  bedding: "Bedding",
+  throwBlanket: "Throw blanket",
+  rug: "Rug",
+  curtains: "Curtains",
+  art: "Picture frames",
+};

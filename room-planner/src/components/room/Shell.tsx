@@ -8,6 +8,9 @@ import * as P from "../../room/params";
 interface ShellProps {
   wallOpacity: number;
   showCeiling: boolean;
+  accentWall: boolean;
+  /** drop the two walls nearest the camera, and the entrance nook, for the whole-room view */
+  dollhouse: boolean;
 }
 
 function FloorPatch({ x0, y0, x1, y1 }: { x0: number; y0: number; x1: number; y1: number }) {
@@ -83,7 +86,7 @@ function Baseboard({
   return <Block min={[off, from, 0]} size={[t, to - from, P.BASEBOARD_H]} material={mats.baseboard} castShadow={false} />;
 }
 
-export function Shell({ wallOpacity, showCeiling }: ShellProps) {
+export function Shell({ wallOpacity, showCeiling, accentWall, dollhouse }: ShellProps) {
   const mats = useMaterials();
   const W = P.ROOM_W;
   const L = P.ROOM_L;
@@ -92,7 +95,7 @@ export function Shell({ wallOpacity, showCeiling }: ShellProps) {
   const E = P.EXT_WALL_T;
 
   useEffect(() => {
-    for (const mat of [mats.wall, mats.ceiling, mats.baseboard]) {
+    for (const mat of [mats.wall, mats.wallAccent, mats.ceiling, mats.baseboard]) {
       mat.transparent = wallOpacity < 1;
       mat.opacity = wallOpacity;
       mat.depthWrite = wallOpacity >= 0.99;
@@ -114,8 +117,12 @@ export function Shell({ wallOpacity, showCeiling }: ShellProps) {
     <group>
       {/* Floors */}
       <FloorPatch x0={0} y0={0} x1={W} y1={L} />
-      <FloorPatch x0={W} y0={nookY0} x1={nookX1} y1={L} />
-      <FloorPatch x0={nookX1} y0={corrY0} x1={corrX1} y1={corrY1} />
+      {!dollhouse && (
+        <>
+          <FloorPatch x0={W} y0={nookY0} x1={nookX1} y1={L} />
+          <FloorPatch x0={nookX1} y0={corrY0} x1={corrX1} y1={corrY1} />
+        </>
+      )}
 
       {/* Ceilings */}
       {showCeiling && (
@@ -126,10 +133,11 @@ export function Shell({ wallOpacity, showCeiling }: ShellProps) {
         </>
       )}
       {/* Ceiling step between the room (243) and the nook (225) */}
-      <Block min={[W, nookY0, P.NOOK_CEILING]} size={[2, L - nookY0, H - P.NOOK_CEILING]} material={wall} />
+      {!dollhouse && <Block min={[W, nookY0, P.NOOK_CEILING]} size={[2, L - nookY0, H - P.NOOK_CEILING]} material={wall} />}
 
-      {/* Bottom (bed) wall, Y = 0 */}
-      <Block min={[-E, -T, 0]} size={[W + T + E, T, H]} material={wall} />
+      {/* Bottom (bed) wall, Y = 0 — this is the one that can take an accent colour.
+          In the dollhouse view the two walls nearest the camera are dropped so you can see in. */}
+      {!dollhouse && <Block min={[-E, -T, 0]} size={[W + T + E, T, H]} material={accentWall ? mats.wallAccent : wall} />}
 
       {/* Window wall, X = 0: solid segments, lintels, sills */}
       <Block min={[-E, 0, 0]} size={[E, P.WINDOW1_Y0, H]} material={wall} />
@@ -149,11 +157,11 @@ export function Shell({ wallOpacity, showCeiling }: ShellProps) {
         </group>
       ))}
 
-      {/* Kitchen wall, Y = L */}
-      <Block min={[-E, L, 0]} size={[nookX1 + T + E, T, H]} material={wall} />
+      {/* Kitchen wall, Y = L (stops at the wall return in the dollhouse view) */}
+      <Block min={[-E, L, 0]} size={[(dollhouse ? W + P.RETURN_LEN : nookX1 + T) + E, T, H]} material={wall} />
 
       {/* Right wall, X = W, solid for Y = 0..305 */}
-      <Block min={[W, -T, 0]} size={[T, nookY0 + T, H]} material={wall} />
+      {!dollhouse && <Block min={[W, -T, 0]} size={[T, nookY0 + T, H]} material={wall} />}
 
       {/* Diagonal wall return beside the kitchen (from the sketch), carrying the light switches.
           Runs from the kitchen-wall corner at (400, 624) toward (+X, -Y) at 45°. */}
@@ -171,6 +179,8 @@ export function Shell({ wallOpacity, showCeiling }: ShellProps) {
         </mesh>
       </group>
 
+      {!dollhouse && (
+        <group>
       {/* Nook south wall (Y = 305) with the bathroom door opening */}
       <Block min={[W + T, nookY0 - T, 0]} size={[doorX0 - (W + T), T, H]} material={wall} />
       <Block min={[doorX0, nookY0 - T, P.DOOR_H]} size={[P.DOOR_W, T, H - P.DOOR_H]} material={wall} />
@@ -192,6 +202,8 @@ export function Shell({ wallOpacity, showCeiling }: ShellProps) {
       <Block min={[nookX1 + T, corrY1, 0]} size={[P.CORRIDOR_LEN, T, H]} material={wall} />
       <Block min={[corrX1, corrY0 - T, 0]} size={[T, P.CORRIDOR_W + 2 * T, H]} material={wall} />
       <Block min={[corrX1 - 4, corrY0 + 4, 0]} size={[4, P.CORRIDOR_W - 8, P.DOOR_H]} material={mats.door} />
+        </group>
+      )}
 
       {/* Baseboards */}
       <Baseboard axis="x" from={0} to={W} at={0} inward={1} />
@@ -199,12 +211,16 @@ export function Shell({ wallOpacity, showCeiling }: ShellProps) {
       <Baseboard axis="y" from={P.WINDOW1_Y1} to={P.WINDOW2_Y0} at={0} inward={1} />
       <Baseboard axis="y" from={P.WINDOW2_Y1} to={L} at={0} inward={1} />
       <Baseboard axis="x" from={0} to={P.KITCHEN_X0} at={L} inward={-1} />
-      <Baseboard axis="y" from={0} to={nookY0} at={W} inward={-1} />
-      <Baseboard axis="x" from={W} to={doorX0 - 3} at={nookY0} inward={1} />
-      <Baseboard axis="x" from={doorX1 + 3} to={nookX1} at={nookY0} inward={1} />
-      <Baseboard axis="y" from={nookY0} to={corrY0} at={nookX1} inward={-1} />
-      <Baseboard axis="y" from={corrY1} to={L} at={nookX1} inward={-1} />
-      <Baseboard axis="x" from={W + P.RETURN_LEN} to={nookX1} at={L} inward={-1} />
+      {!dollhouse && (
+        <group>
+          <Baseboard axis="y" from={0} to={nookY0} at={W} inward={-1} />
+          <Baseboard axis="x" from={W} to={doorX0 - 3} at={nookY0} inward={1} />
+          <Baseboard axis="x" from={doorX1 + 3} to={nookX1} at={nookY0} inward={1} />
+          <Baseboard axis="y" from={nookY0} to={corrY0} at={nookX1} inward={-1} />
+          <Baseboard axis="y" from={corrY1} to={L} at={nookX1} inward={-1} />
+          <Baseboard axis="x" from={W + P.RETURN_LEN} to={nookX1} at={L} inward={-1} />
+        </group>
+      )}
     </group>
   );
 }

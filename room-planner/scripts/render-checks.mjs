@@ -16,6 +16,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "renders");
 const PORT = 5197;
 const LENS = process.env.LENS ?? "14";
+const LOOK = process.env.LOOK ?? "as-is";
 
 // [view, file name, portrait?, dimension labels?]
 const SHOTS = [
@@ -63,8 +64,9 @@ try {
       },
       { lens: LENS },
     );
+    // "as-is" keeps the check renders showing the real flat rather than a decorated look
     const dimsParam = view === "top" && !dims ? "&dims=0" : "";
-    await page.goto(`http://localhost:${PORT}/?view=${view}&ui=0${dimsParam}`, { waitUntil: "networkidle" });
+    await page.goto(`http://localhost:${PORT}/?view=${view}&ui=0&look=${LOOK}${dimsParam}`, { waitUntil: "networkidle" });
     await page.waitForSelector("canvas");
     await page.waitForTimeout(4500);
     await page.screenshot({ path: path.join(OUT, `${name}.jpg`), type: "jpeg", quality: 88 });

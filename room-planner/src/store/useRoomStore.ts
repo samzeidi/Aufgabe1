@@ -16,7 +16,7 @@ const VIEW_IDS: ViewId[] = ["overview", "top", "kitchen", "bed", "table", "kitch
 function initialView(): ViewId {
   if (typeof window === "undefined") return "kitchen";
   const v = new URLSearchParams(window.location.search).get("view");
-  return VIEW_IDS.includes(v as ViewId) ? (v as ViewId) : "kitchen";
+  return VIEW_IDS.includes(v as ViewId) ? (v as ViewId) : "bed";
 }
 
 interface RoomStore {
