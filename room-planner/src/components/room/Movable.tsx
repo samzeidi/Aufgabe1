@@ -8,13 +8,15 @@ import { useDesignStore } from "../../store/useDesignStore";
 const FLOOR = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
 /**
- * Wraps an item so it can be tapped to select and dragged across the floor.
- * Children are drawn in centimetres relative to the item's own centre at floor level.
+ * Wraps an item so it can be tapped to select it. It only follows the finger
+ * once Move has been switched on for it, so nothing gets shoved by accident.
+ * Children are drawn in centimetres around the item's own centre at floor level.
  */
 export function Movable({ id, children }: { id: ItemId; children: ReactNode }) {
   const transform = useDesignStore((s) => s.layout[id]);
   const styles = useDesignStore((s) => s.styles);
   const selected = useDesignStore((s) => s.selected === id);
+  const armed = useDesignStore((s) => s.selected === id && s.moveMode);
   const select = useDesignStore((s) => s.select);
   const setDragging = useDesignStore((s) => s.setDragging);
   const moveItem = useDesignStore((s) => s.moveItem);
@@ -25,17 +27,15 @@ export function Movable({ id, children }: { id: ItemId; children: ReactNode }) {
 
   const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
-    (e.target as Element).setPointerCapture?.(e.pointerId);
-    select(id);
-    setDragging(true);
-    if (e.ray.intersectPlane(FLOOR, hit.current)) {
-      grab.current = {
-        dx: transform.x - hit.current.x * 100,
-        dy: transform.y + hit.current.z * 100,
-      };
-    } else {
-      grab.current = { dx: 0, dy: 0 };
+    if (!armed) {
+      select(id);
+      return;
     }
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    setDragging(true);
+    grab.current = e.ray.intersectPlane(FLOOR, hit.current)
+      ? { dx: transform.x - hit.current.x * 100, dy: transform.y + hit.current.z * 100 }
+      : { dx: 0, dy: 0 };
   };
 
   const onPointerMove = (e: ThreeEvent<PointerEvent>) => {
@@ -66,7 +66,12 @@ export function Movable({ id, children }: { id: ItemId; children: ReactNode }) {
       {selected && w > 0 && (
         <mesh position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[(w + 8) / 100, (d + 8) / 100]} />
-          <meshBasicMaterial color="#5b8cff" transparent opacity={0.28} depthWrite={false} />
+          <meshBasicMaterial
+            color={armed ? "#8fae80" : "#5b8cff"}
+            transparent
+            opacity={armed ? 0.55 : 0.26}
+            depthWrite={false}
+          />
         </mesh>
       )}
     </group>

@@ -4,6 +4,10 @@ export type SofaStyle = "existing" | "loveseat" | "sectional" | "chesterfield";
 export type BedStyle = "existing" | "wood" | "upholstered";
 export type RugStyle = "none" | "jute" | "persian" | "shag";
 export type CurtainStyle = "none" | "linen" | "velvet";
+/** stick-on splashback tiles; "original" is the real cream tiling */
+export type BacksplashStyle = "original" | "plain" | "metro" | "zellige" | "checker" | "pattern";
+/** the decorative border row on the splashback */
+export type BorderRow = "keep" | "hide" | "band";
 
 export interface DesignColors {
   wall: string;
@@ -16,6 +20,8 @@ export interface DesignColors {
   rug: string;
   curtains: string;
   art: string;
+  tile: string;
+  tilePattern: string;
 }
 
 export interface DesignStyles {
@@ -26,6 +32,8 @@ export interface DesignStyles {
   curtains: CurtainStyle;
   plants: boolean;
   art: boolean;
+  backsplash: BacksplashStyle;
+  borderRow: BorderRow;
 }
 
 export type ItemId =

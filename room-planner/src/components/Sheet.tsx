@@ -24,6 +24,8 @@ const COLOR_ORDER: (keyof DesignColors)[] = [
   "rug",
   "curtains",
   "art",
+  "tile",
+  "tilePattern",
 ];
 
 function useCopy() {
@@ -84,15 +86,24 @@ export function Sheet() {
   const resetAll = useDesignStore((s) => s.resetAll);
   const snapshot = useDesignStore((s) => s.snapshot);
 
-  // keep the sheet out of the way while something is being dragged
+  // the sheet closes while dragging, and disappears entirely in move mode so
+  // the whole screen is free to drag on
   const dragging = useDesignStore((s) => s.dragging);
+  const moveMode = useDesignStore((s) => s.moveMode);
   useEffect(() => {
-    if (dragging) setOpen(false);
-  }, [dragging]);
+    if (dragging || moveMode) setOpen(false);
+  }, [dragging, moveMode]);
 
   const shareLink = () => `${window.location.origin}${window.location.pathname}#d=${encodeDesign(snapshot())}`;
-  const visibleColors = COLOR_ORDER.filter((key) => key !== "accentWall" || styles.accentWall);
+  const visibleColors = COLOR_ORDER.filter(
+    (key) =>
+      (key !== "accentWall" || styles.accentWall) &&
+      (key !== "tile" || styles.backsplash !== "original") &&
+      (key !== "tilePattern" || styles.backsplash !== "original" || styles.borderRow === "band"),
+  );
   const colourList = () => visibleColors.map((key) => `${COLOR_LABELS[key]}: ${colors[key].toUpperCase()}`).join("\n");
+
+  if (moveMode) return null;
 
   return (
     <div className={`sheet ${open ? "open" : "peek"}`}>
@@ -163,7 +174,10 @@ export function Sheet() {
               <section>
                 <p className="hint">Tap a circle to pick any colour. The code underneath is what you search for.</p>
                 {COLOR_ORDER.map((key) => {
-                  const disabled = key === "accentWall" && !styles.accentWall;
+                  const disabled =
+                    (key === "accentWall" && !styles.accentWall) ||
+                    (key === "tile" && styles.backsplash === "original") ||
+                    (key === "tilePattern" && styles.backsplash === "original" && styles.borderRow !== "band");
                   return (
                     <div className={`colour-row ${disabled ? "disabled" : ""}`} key={key}>
                       <label className="swatch" style={{ background: colors[key] }}>
@@ -198,8 +212,8 @@ export function Sheet() {
             {tab === "stuff" && (
               <section>
                 <p className="hint">
-                  Drag anything in the room to move it, then use the arrows for fine tuning. The kitchen, windows and
-                  walls are the real flat — they stay put.
+                  Tap something in the room, then tap <b>Move</b> to drag it — that way nothing shifts by accident.
+                  The kitchen units, windows and walls are the real flat, so they stay put.
                 </p>
                 <Picker
                   label="Sofa"
@@ -243,6 +257,33 @@ export function Sheet() {
                     ["velvet", "Velvet"],
                   ] as const}
                 />
+                <Picker
+                  label="Kitchen splashback — stick-on tiles"
+                  value={styles.backsplash}
+                  onChange={(v) => setStyle("backsplash", v)}
+                  options={[
+                    ["original", "As it is"],
+                    ["plain", "Plain squares"],
+                    ["metro", "Metro"],
+                    ["zellige", "Zellige"],
+                    ["checker", "Checkerboard"],
+                    ["pattern", "Patterned"],
+                  ] as const}
+                />
+                <Picker
+                  label="The decorative row on the tiles"
+                  value={styles.borderRow}
+                  onChange={(v) => setStyle("borderRow", v)}
+                  options={[
+                    ["keep", "Keep it"],
+                    ["hide", "Cover it"],
+                    ["band", "Plain band"],
+                  ] as const}
+                />
+                <p className="hint">
+                  Tile stickers go straight over the existing tiles and peel off again — the colours are under
+                  <b> Colours → Splashback</b>.
+                </p>
                 <div className="switch-list">
                   <label>
                     <span>Plants</span>

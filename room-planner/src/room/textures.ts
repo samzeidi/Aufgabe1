@@ -80,23 +80,160 @@ export function kitchenTileTexture(sizeUcm: number, sizeVcm: number) {
   return finish(c, sizeUcm / 100, sizeVcm / 100);
 }
 
-/** Thin decorative tile strip. */
+/**
+ * The real decorative border row: 10 cm tiles alternating tan and cream,
+ * each with a dark brown horizontal oval. One texture tile = 100 cm.
+ */
 export function tileStripTexture(sizeUcm: number) {
   const px = 512;
-  const { c, ctx } = canvas(px, 64);
+  const h = 64;
+  const { c, ctx } = canvas(px, h);
   ctx.fillStyle = "#B8B3A9";
-  ctx.fillRect(0, 0, px, 64);
-  const n = 20;
+  ctx.fillRect(0, 0, px, h);
+  const n = 10;
   const t = px / n;
   for (let i = 0; i < n; i++) {
-    ctx.fillStyle = i % 2 === 0 ? "#C9BFA6" : "#9E8F78";
-    ctx.fillRect(i * t + 2, 6, t - 4, 52);
-    ctx.fillStyle = "#6F6350";
+    ctx.fillStyle = i % 2 === 0 ? "#C6B393" : "#E4DCCB";
+    ctx.fillRect(i * t + 2, 3, t - 4, h - 6);
+    ctx.fillStyle = "#4E3A2A";
     ctx.beginPath();
-    ctx.arc(i * t + t / 2, 32, 8, 0, Math.PI * 2);
+    ctx.ellipse(i * t + t / 2, h / 2, t * 0.19, h * 0.16, 0, 0, Math.PI * 2);
     ctx.fill();
   }
   return finish(c, sizeUcm / 100, 1);
+}
+
+/** A plain coloured border band (for when the row is re-stickered). */
+export function borderBandTexture(color: string, sizeUcm: number) {
+  const px = 256;
+  const h = 64;
+  const { c, ctx } = canvas(px, h);
+  ctx.fillStyle = "#B8B3A9";
+  ctx.fillRect(0, 0, px, h);
+  const n = 5;
+  const t = px / n;
+  for (let i = 0; i < n; i++) {
+    ctx.fillStyle = color;
+    ctx.fillRect(i * t + 2, 3, t - 4, h - 6);
+  }
+  return finish(c, sizeUcm / 100, 1);
+}
+
+export type BacksplashStyle = "original" | "plain" | "metro" | "zellige" | "checker" | "pattern";
+
+function jitter(hex: string, amount: number, rnd: () => number) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  const n = m ? parseInt(m[1], 16) : 0xdddddd;
+  const f = 1 + (rnd() - 0.5) * amount;
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v * f)));
+  return `rgb(${clamp((n >> 16) & 255)},${clamp((n >> 8) & 255)},${clamp(n & 255)})`;
+}
+
+function darken(hex: string, factor: number) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  const n = m ? parseInt(m[1], 16) : 0xdddddd;
+  const f = (v: number) => Math.max(0, Math.min(255, Math.round(v * factor)));
+  return `rgb(${f((n >> 16) & 255)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+
+/**
+ * Stick-on splashback tiles. One texture tile = 100 x 100 cm, so the
+ * squares come out at a realistic 10 cm (20 x 10 for metro).
+ */
+export function backsplashTexture(
+  style: Exclude<BacksplashStyle, "original">,
+  tile: string,
+  pattern: string,
+  sizeUcm: number,
+  sizeVcm: number,
+) {
+  const px = 512;
+  const { c, ctx } = canvas(px, px);
+  const rnd = mulberry32(17);
+  const grout = darken(tile, style === "metro" ? 0.86 : 0.8);
+  ctx.fillStyle = grout;
+  ctx.fillRect(0, 0, px, px);
+
+  if (style === "metro") {
+    const bw = px / 5; // 20 cm
+    const bh = px / 10; // 10 cm
+    const g = 3;
+    for (let row = 0; row < 10; row++) {
+      const offset = row % 2 === 0 ? 0 : -bw / 2;
+      for (let i = -1; i < 6; i++) {
+        ctx.fillStyle = jitter(tile, 0.05, rnd);
+        ctx.fillRect(i * bw + offset + g / 2, row * bh + g / 2, bw - g, bh - g);
+      }
+    }
+  } else if (style === "zellige") {
+    const t = px / 10;
+    const g = 4;
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        ctx.fillStyle = jitter(tile, 0.22, rnd);
+        const inset = rnd() * 2;
+        ctx.fillRect(i * t + g / 2 + inset, j * t + g / 2 + inset, t - g - inset, t - g - inset);
+        // glazed highlight
+        ctx.fillStyle = `rgba(255,255,255,${0.05 + rnd() * 0.12})`;
+        ctx.fillRect(i * t + g, j * t + g, t - 2 * g, (t - 2 * g) * 0.35);
+      }
+    }
+  } else if (style === "checker") {
+    const t = px / 10;
+    const g = 3;
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        ctx.fillStyle = (i + j) % 2 === 0 ? jitter(tile, 0.04, rnd) : jitter(pattern, 0.04, rnd);
+        ctx.fillRect(i * t + g / 2, j * t + g / 2, t - g, t - g);
+      }
+    }
+  } else if (style === "pattern") {
+    const t = px / 5; // 20 cm patterned tiles
+    const g = 3;
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        const x = i * t;
+        const y = j * t;
+        ctx.fillStyle = jitter(tile, 0.03, rnd);
+        ctx.fillRect(x + g / 2, y + g / 2, t - g, t - g);
+        ctx.save();
+        ctx.translate(x + t / 2, y + t / 2);
+        ctx.fillStyle = pattern;
+        // four-petal motif
+        for (let k = 0; k < 4; k++) {
+          ctx.rotate(Math.PI / 2);
+          ctx.beginPath();
+          ctx.ellipse(0, -t * 0.22, t * 0.1, t * 0.19, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(0, 0, t * 0.08, 0, Math.PI * 2);
+        ctx.fill();
+        // corner quarter-circles
+        ctx.globalAlpha = 0.75;
+        for (let k = 0; k < 4; k++) {
+          ctx.rotate(Math.PI / 2);
+          ctx.beginPath();
+          ctx.arc(-t / 2, -t / 2, t * 0.14, 0, Math.PI / 2);
+          ctx.lineTo(-t / 2, -t / 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+  } else {
+    // plain squares
+    const t = px / 10;
+    const g = 3;
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        ctx.fillStyle = jitter(tile, 0.045, rnd);
+        ctx.fillRect(i * t + g / 2, j * t + g / 2, t - g, t - g);
+      }
+    }
+  }
+
+  return finish(c, sizeUcm / 100, sizeVcm / 100);
 }
 
 /** Subtle plaster noise, for walls/ceiling. */

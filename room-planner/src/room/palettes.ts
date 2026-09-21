@@ -18,6 +18,8 @@ const base: DesignStyles = {
   curtains: "linen",
   plants: true,
   art: true,
+  backsplash: "original",
+  borderRow: "keep",
 };
 
 export const DEFAULT_STYLES: DesignStyles = base;
@@ -44,8 +46,10 @@ export const TEMPLATES: Template[] = [
       rug: "#C9B8A2",
       curtains: "#E6E1D6",
       art: "#8A907F",
+      tile: "#E8E2D2",
+      tilePattern: "#C6B393",
     },
-    styles: { ...base, accentWall: false, rug: "none", curtains: "none", plants: false, art: false },
+    styles: { ...base, backsplash: "original", borderRow: "keep", accentWall: false, rug: "none", curtains: "none", plants: false, art: false },
   },
   {
     id: "cosy-autumn",
@@ -63,8 +67,10 @@ export const TEMPLATES: Template[] = [
       rug: "#C9B8A2",
       curtains: "#6B7A64",
       art: "#3E4639",
+      tile: "#EDE7DA",
+      tilePattern: "#6B7A64",
     },
-    styles: { ...base, sofa: "loveseat", curtains: "velvet" },
+    styles: { ...base, backsplash: "plain", borderRow: "band", sofa: "loveseat", curtains: "velvet" },
   },
   {
     id: "sage-linen",
@@ -82,8 +88,10 @@ export const TEMPLATES: Template[] = [
       rug: "#CBBBA0",
       curtains: "#EDE6D8",
       art: "#7C8A74",
+      tile: "#F0EBE0",
+      tilePattern: "#9AA48D",
     },
-    styles: { ...base, sofa: "loveseat" },
+    styles: { ...base, backsplash: "metro", borderRow: "hide", sofa: "loveseat" },
   },
   {
     id: "forest-cognac",
@@ -101,8 +109,10 @@ export const TEMPLATES: Template[] = [
       rug: "#B3A68A",
       curtains: "#3E4639",
       art: "#C9B8A2",
+      tile: "#E8E2D6",
+      tilePattern: "#3E4639",
     },
-    styles: { ...base, sofa: "chesterfield", curtains: "velvet", rug: "persian" },
+    styles: { ...base, backsplash: "metro", borderRow: "hide", sofa: "chesterfield", curtains: "velvet", rug: "persian" },
   },
   {
     id: "moss-sand",
@@ -120,8 +130,10 @@ export const TEMPLATES: Template[] = [
       rug: "#BCA886",
       curtains: "#DED3BC",
       art: "#5D6748",
+      tile: "#E4DAC4",
+      tilePattern: "#6F7A52",
     },
-    styles: { ...base },
+    styles: { ...base, backsplash: "zellige", borderRow: "hide" },
   },
   {
     id: "emerald-walnut",
@@ -139,8 +151,10 @@ export const TEMPLATES: Template[] = [
       rug: "#8C7B63",
       curtains: "#2F4A3F",
       art: "#C2A25B",
+      tile: "#DED6C7",
+      tilePattern: "#2F4A3F",
     },
-    styles: { ...base, sofa: "sectional", curtains: "velvet", rug: "persian" },
+    styles: { ...base, backsplash: "pattern", borderRow: "hide", sofa: "sectional", curtains: "velvet", rug: "persian" },
   },
   {
     id: "terracotta-sage",
@@ -158,8 +172,10 @@ export const TEMPLATES: Template[] = [
       rug: "#C7A98A",
       curtains: "#E8DCCB",
       art: "#8A5A42",
+      tile: "#F0E8DA",
+      tilePattern: "#B4674D",
     },
-    styles: { ...base, sofa: "loveseat" },
+    styles: { ...base, backsplash: "pattern", borderRow: "hide", sofa: "loveseat" },
   },
   {
     id: "mocha-sage",
@@ -177,8 +193,10 @@ export const TEMPLATES: Template[] = [
       rug: "#B7A488",
       curtains: "#DCD3C2",
       art: "#5A6151",
+      tile: "#EDE6DA",
+      tilePattern: "#7A8471",
     },
-    styles: { ...base, sofa: "loveseat", rug: "shag" },
+    styles: { ...base, backsplash: "plain", borderRow: "band", sofa: "loveseat", rug: "shag" },
   },
   {
     id: "umber-fern",
@@ -196,8 +214,10 @@ export const TEMPLATES: Template[] = [
       rug: "#8A7A60",
       curtains: "#46543F",
       art: "#C2A25B",
+      tile: "#D8CBB6",
+      tilePattern: "#46543F",
     },
-    styles: { ...base, sofa: "chesterfield", curtains: "velvet", rug: "persian" },
+    styles: { ...base, backsplash: "checker", borderRow: "hide", sofa: "chesterfield", curtains: "velvet", rug: "persian" },
   },
   {
     id: "almond-eucalyptus",
@@ -215,8 +235,10 @@ export const TEMPLATES: Template[] = [
       rug: "#D0C0A4",
       curtains: "#F0EBE0",
       art: "#7E9184",
+      tile: "#F4F1EA",
+      tilePattern: "#9FB0A2",
     },
-    styles: { ...base, sofa: "loveseat" },
+    styles: { ...base, backsplash: "zellige", borderRow: "hide", sofa: "loveseat" },
   },
   {
     id: "olive-cream",
@@ -234,8 +256,10 @@ export const TEMPLATES: Template[] = [
       rug: "#C4B190",
       curtains: "#E9E3D4",
       art: "#6B6C46",
+      tile: "#F2EEE4",
+      tilePattern: "#7E7F55",
     },
-    styles: { ...base, bed: "wood" },
+    styles: { ...base, backsplash: "checker", borderRow: "hide", bed: "wood" },
   },
 ];
 
@@ -256,4 +280,6 @@ export const COLOR_LABELS: Record<keyof DesignColors, string> = {
   rug: "Rug",
   curtains: "Curtains",
   art: "Picture frames",
+  tile: "Splashback tiles",
+  tilePattern: "Tile pattern / border",
 };

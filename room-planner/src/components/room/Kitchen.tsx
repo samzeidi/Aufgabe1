@@ -1,6 +1,10 @@
+import { useEffect, useMemo } from "react";
+import * as THREE from "three";
 import { Block } from "./Block";
 import { toWorld } from "../../room/coords";
 import { useMaterials } from "../../room/materials";
+import { backsplashTexture, borderBandTexture } from "../../room/textures";
+import { useDesignStore } from "../../store/useDesignStore";
 import * as P from "../../room/params";
 
 const GAP = 0.3; // door gap, cm
@@ -275,22 +279,77 @@ function TallUnit() {
   );
 }
 
+/**
+ * The splashback. "original" is the real cream tiling with its brown border
+ * row; the rest are stick-on tiles (Fliesenaufkleber), which is how you change
+ * this in a rented flat.
+ */
 function Backsplash() {
   const mats = useMaterials();
+  const style = useDesignStore((s) => s.styles.backsplash);
+  const borderRow = useDesignStore((s) => s.styles.borderRow);
+  const tile = useDesignStore((s) => s.colors.tile);
+  const tilePattern = useDesignStore((s) => s.colors.tilePattern);
+
   const z0 = P.COUNTER_H;
   const z1 = P.UPPER_Z0;
+  const width = X_TALL - X_SINK;
+  const height = z1 - z0;
+
+  const stickerMaterial = useMemo(() => {
+    if (style === "original") return null;
+    return new THREE.MeshStandardMaterial({
+      map: backsplashTexture(style, tile, tilePattern, width, height),
+      roughness: style === "zellige" ? 0.16 : 0.32,
+      metalness: 0,
+    });
+  }, [style, tile, tilePattern, width, height]);
+
+  const bandMaterial = useMemo(() => {
+    if (borderRow !== "band") return null;
+    return new THREE.MeshStandardMaterial({
+      map: borderBandTexture(tilePattern, width),
+      roughness: 0.32,
+      metalness: 0,
+    });
+  }, [borderRow, tilePattern, width]);
+
+  // free the GPU copies when she flips to another option
+  useEffect(
+    () => () => {
+      stickerMaterial?.map?.dispose();
+      stickerMaterial?.dispose();
+    },
+    [stickerMaterial],
+  );
+  useEffect(
+    () => () => {
+      bandMaterial?.map?.dispose();
+      bandMaterial?.dispose();
+    },
+    [bandMaterial],
+  );
+
+  const stripMaterial = borderRow === "band" ? bandMaterial : borderRow === "keep" ? mats.tileStrip : null;
+
   return (
     <group>
       <mesh
         position={toWorld((X_SINK + X_TALL) / 2, WALL_Y - 0.4, (z0 + z1) / 2)}
-        material={mats.tile}
+        material={stickerMaterial ?? mats.tile}
         receiveShadow
       >
-        <planeGeometry args={[(X_TALL - X_SINK) / 100, (z1 - z0) / 100]} />
+        <planeGeometry args={[width / 100, height / 100]} />
       </mesh>
-      <mesh position={toWorld((X_SINK + X_TALL) / 2, WALL_Y - 0.7, P.TILE_STRIP_Z + 2.5)} material={mats.tileStrip} receiveShadow>
-        <planeGeometry args={[(X_TALL - X_SINK) / 100, 0.05]} />
-      </mesh>
+      {stripMaterial && (
+        <mesh
+          position={toWorld((X_SINK + X_TALL) / 2, WALL_Y - 0.7, P.TILE_STRIP_Z + 2.5)}
+          material={stripMaterial}
+          receiveShadow
+        >
+          <planeGeometry args={[width / 100, 0.05]} />
+        </mesh>
+      )}
     </group>
   );
 }

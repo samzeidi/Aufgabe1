@@ -35,7 +35,7 @@ export function Hint() {
           <b>Tap a look</b> at the bottom to repaint everything at once.
         </li>
         <li>
-          <b>Drag</b> the bed, sofa, table, rug or plants to move them.
+          <b>Tap</b> the bed, sofa, table, rug or a plant, then tap <b>Move</b> to drag it somewhere else.
         </li>
         <li>Every colour comes with a code you can search for.</li>
       </ul>

@@ -17,16 +17,22 @@ Live: **https://samzeidi.github.io/Aufgabe1/**
   - *Looks* — the same ten, with a description each.
   - *Colours* — a circle per surface; tap it for the phone's colour picker. Each
     one shows its hex code; tap the code to copy it.
-  - *Furniture* — swap the sofa, bed, rug and curtains, toggle plants and
-    pictures, see through the walls, put everything back.
+  - *Furniture* — swap the sofa, bed, rug and curtains, re-tile the kitchen
+    splashback with stick-on tiles (plain, metro, zellige, checkerboard or
+    patterned) and keep/cover/replace its decorative border row, toggle plants
+    and pictures, see through the walls, put everything back.
   - *Codes* — the whole palette as a list, "copy all codes", and a link that
     carries the entire design (colours, furniture, positions) so it can be sent
     to someone else.
-- **Drag** the bed, sofa, table, rug, shelves or plants to move them. Tap one to
-  select it and get rotate/nudge buttons. Everything saves automatically.
+- **Tap** the bed, sofa, table, rug, a shelf or a plant to select it, then tap
+  **Move** to drag it — nothing shifts by accident, and tapping *Finish* locks
+  it again. Rotate and 5 cm nudge buttons are there too. Everything saves
+  automatically.
 
-The kitchen, windows, walls and floor are the real flat and can't be moved or
-recoloured — the point is to see what actually fits.
+The kitchen units, windows, walls and floor are the real flat and can't be
+moved — the point is to see what actually fits. The splashback is the one
+exception: tile stickers go over the existing tiles and come off again, so it
+is editable.
 
 ## The reconstruction
 

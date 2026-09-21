@@ -21,7 +21,10 @@ export interface DesignSnapshot {
 
 interface DesignStore extends DesignSnapshot {
   selected: ItemId | null;
+  /** nothing moves by accident: dragging only works once Move is switched on */
+  moveMode: boolean;
   dragging: boolean;
+  setMoveMode: (value: boolean) => void;
   applyTemplate: (id: string) => void;
   setColor: (key: keyof DesignColors, value: string) => void;
   setStyle: <K extends keyof DesignStyles>(key: K, value: DesignStyles[K]) => void;
@@ -105,7 +108,9 @@ export const useDesignStore = create<DesignStore>()(
     (set, get) => ({
       ...INITIAL,
       selected: null,
+      moveMode: false,
       dragging: false,
+      setMoveMode: (value) => set({ moveMode: value }),
 
       applyTemplate: (id) => {
         const template = templateById(id);
@@ -128,7 +133,8 @@ export const useDesignStore = create<DesignStore>()(
           return { styles, layout: reclamp(s.layout, styles), templateId: "custom" };
         }),
 
-      select: (id) => set({ selected: id }),
+      // picking something new always leaves move switched off
+      select: (id) => set({ selected: id, moveMode: false }),
       setDragging: (value) => set({ dragging: value }),
 
       moveItem: (id, x, y) =>
@@ -151,12 +157,13 @@ export const useDesignStore = create<DesignStore>()(
         }),
 
       resetLayout: () => set((s) => ({ layout: reclamp(DEFAULT_LAYOUT, s.styles) })),
-      resetAll: () => set({ ...INITIAL, selected: null }),
+      resetAll: () => set({ ...INITIAL, selected: null, moveMode: false }),
       load: (snapshot) =>
         set({
           ...snapshot,
           layout: reclamp(snapshot.layout, snapshot.styles),
           selected: null,
+          moveMode: false,
         }),
       snapshot: () => {
         const { templateId, colors, styles, layout } = get();
