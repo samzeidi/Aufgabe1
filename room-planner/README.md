@@ -2,8 +2,8 @@
 
 A 1:1 digital twin of the main living/sleeping/kitchen room, reconstructed from
 the hand-drawn floor plan and the room photos — and a phone-first tool for
-redecorating it: ten ready-made looks, editable colours with codes you can
-search for, swappable furniture, and drag-to-move layout.
+redecorating it: sixteen ready-made looks, editable colours with codes you can
+search for, swappable and addable furniture, and a tap-then-move layout.
 
 Live: **https://samzeidi.github.io/Aufgabe1/**
 
@@ -17,17 +17,19 @@ Live: **https://samzeidi.github.io/Aufgabe1/**
   - *Looks* — the same ten, with a description each.
   - *Colours* — a circle per surface; tap it for the phone's colour picker. Each
     one shows its hex code; tap the code to copy it.
-  - *Furniture* — swap the sofa, bed, rug and curtains, re-tile the kitchen
-    splashback with stick-on tiles (plain, metro, zellige, checkerboard or
-    patterned) and keep/cover/replace its decorative border row, toggle plants
-    and pictures, see through the walls, put everything back.
+  - *Furniture* — add shelves (wall shelf, small, tall, bookcase, cube) one at
+    a time or as a ready-made wall arrangement (zigzag, staircase, stacked,
+    pair); swap the sofa, bed, rug and curtains; re-tile the kitchen splashback
+    with stick-on tiles (plain, metro, zellige, checkerboard or patterned) and
+    keep/cover/replace its decorative border row; toggle shelf plants and
+    pictures; see through the walls; put everything back.
   - *Codes* — the whole palette as a list, "copy all codes", and a link that
     carries the entire design (colours, furniture, positions) so it can be sent
     to someone else.
 - **Tap** the bed, sofa, table, rug, a shelf or a plant to select it, then tap
   **Move** to drag it — nothing shifts by accident, and tapping *Finish* locks
-  it again. Rotate and 5 cm nudge buttons are there too. Everything saves
-  automatically.
+  it again. Rotate, 5 cm nudge, remove, and for shelves a 40/60/80 cm width
+  (wall shelves also get a mounting height). Everything saves automatically.
 
 The kitchen units, windows, walls and floor are the real flat and can't be
 moved — the point is to see what actually fits. The splashback is the one
@@ -44,7 +46,9 @@ corner, X across the 400 cm wall, Y toward the kitchen, Z up).
 Measured (authoritative): room 400 × 624 × 243; window wall sequence from the
 bed wall 107 / 127 / 131 / 127 / 132; windows 127 × 225; kitchen 285 long
 starting 110 from the window wall (so it ends at 395); right solid wall 305;
-bed 140 × 200; table Ø110; sofa 150; shelves 36 × 30.
+bed 140 × 200; table Ø110; sofa 150; shelves 36 × 30. The couch is a natural
+dark moss green (#4C5B44) and stays green in every look; added shelves come in
+40 / 60 / 80 cm.
 
 Inferred from the photos: kitchen module sequence (sink 60 · open niche 60 ·
 oven+cooktop 60 · drawer unit 45 · tall unit 60), upper cabinets 145–212 cm with
@@ -64,7 +68,8 @@ daylight and tungsten shots.
 | --- | --- |
 | `src/room/params.ts` | every real dimension, in cm |
 | `src/room/design.ts` | what's editable: colours, styles, layout, clamping |
-| `src/room/palettes.ts` | the ten looks |
+| `src/room/palettes.ts` | the sixteen looks |
+| `src/components/room/Shelves.tsx` | shelf kinds, books and trailing plants |
 | `src/room/materials.tsx` | materials; design colours are applied here |
 | `src/components/room/` | shell, windows, kitchen, furniture, decor, lighting |
 | `src/components/Sheet.tsx` | the bottom sheet UI |

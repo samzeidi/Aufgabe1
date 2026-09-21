@@ -2,15 +2,20 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
   DEFAULT_LAYOUT,
-  clampTransform,
+  DEFAULT_SHELF_WIDTH,
+  DEFAULT_WALL_SHELF_Z,
+  clampItem,
+  findFreeSpot,
+  migrateLayout,
+  isShelf,
+  SHELF_PATTERNS,
   type DesignColors,
   type DesignStyles,
-  type ItemId,
+  type ItemKind,
   type Layout,
-  type Transform,
+  type PlacedItem,
 } from "../room/design";
 import { DEFAULT_TEMPLATE, DEFAULT_STYLES, templateById } from "../room/palettes";
-import { DEFAULT_LAYOUT as LAYOUT } from "../room/design";
 
 export interface DesignSnapshot {
   templateId: string;
@@ -20,7 +25,7 @@ export interface DesignSnapshot {
 }
 
 interface DesignStore extends DesignSnapshot {
-  selected: ItemId | null;
+  selected: string | null;
   /** nothing moves by accident: dragging only works once Move is switched on */
   moveMode: boolean;
   dragging: boolean;
@@ -28,14 +33,18 @@ interface DesignStore extends DesignSnapshot {
   applyTemplate: (id: string) => void;
   setColor: (key: keyof DesignColors, value: string) => void;
   setStyle: <K extends keyof DesignStyles>(key: K, value: DesignStyles[K]) => void;
-  select: (id: ItemId | null) => void;
+  select: (id: string | null) => void;
   setDragging: (value: boolean) => void;
-  moveItem: (id: ItemId, x: number, y: number) => void;
-  rotateItem: (id: ItemId, deltaDeg: number) => void;
-  nudgeItem: (id: ItemId, dx: number, dy: number) => void;
+  moveItem: (id: string, x: number, y: number) => void;
+  rotateItem: (id: string, deltaDeg: number) => void;
+  nudgeItem: (id: string, dx: number, dy: number) => void;
+  setItemWidth: (id: string, w: number) => void;
+  setItemHeight: (id: string, z: number) => void;
+  addItem: (kind: ItemKind) => void;
+  addShelfPattern: (patternId: string) => void;
+  removeItem: (id: string) => void;
   resetLayout: () => void;
   resetAll: () => void;
-  load: (snapshot: DesignSnapshot) => void;
   snapshot: () => DesignSnapshot;
 }
 
@@ -43,15 +52,13 @@ const INITIAL: DesignSnapshot = {
   templateId: DEFAULT_TEMPLATE.id,
   colors: DEFAULT_TEMPLATE.colors,
   styles: { ...DEFAULT_STYLES, ...DEFAULT_TEMPLATE.styles },
-  layout: DEFAULT_LAYOUT,
+  layout: DEFAULT_TEMPLATE.layout ?? DEFAULT_LAYOUT,
 };
 
 /** Re-clamp everything, e.g. after a style change alters a footprint. */
 function reclamp(layout: Layout, styles: DesignStyles): Layout {
-  const next = {} as Layout;
-  for (const key of Object.keys(layout) as ItemId[]) {
-    next[key] = clampTransform(key, layout[key], styles);
-  }
+  const next: Layout = {};
+  for (const [id, item] of Object.entries(layout)) next[id] = clampItem(item, styles);
   return next;
 }
 
@@ -66,14 +73,13 @@ export function encodeDesign(s: DesignSnapshot): string {
 export function decodeDesign(encoded: string): DesignSnapshot | null {
   try {
     const b64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
-    const json = decodeURIComponent(escape(atob(b64)));
-    const parsed = JSON.parse(json) as DesignSnapshot;
-    if (!parsed.colors || !parsed.styles || !parsed.layout) return null;
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(b64)))) as Partial<DesignSnapshot>;
+    if (!parsed.colors || !parsed.styles) return null;
     return {
       templateId: parsed.templateId ?? "custom",
       colors: { ...INITIAL.colors, ...parsed.colors },
       styles: { ...INITIAL.styles, ...parsed.styles },
-      layout: { ...DEFAULT_LAYOUT, ...parsed.layout },
+      layout: migrateLayout(parsed.layout),
     };
   } catch {
     return null;
@@ -96,11 +102,17 @@ function fromUrl(): DesignSnapshot | null {
     return {
       templateId: template.id,
       colors: template.colors,
-      styles: { ...DEFAULT_STYLES, ...template.styles },
-      layout: LAYOUT,
+      styles: template.styles,
+      layout: template.layout ?? DEFAULT_LAYOUT,
     };
   }
   return null;
+}
+
+function newId(kind: ItemKind, layout: Layout): string {
+  let i = 1;
+  while (layout[`${kind}-${i}`]) i += 1;
+  return `${kind}-${i}`;
 }
 
 export const useDesignStore = create<DesignStore>()(
@@ -115,12 +127,14 @@ export const useDesignStore = create<DesignStore>()(
       applyTemplate: (id) => {
         const template = templateById(id);
         if (!template) return;
-        const styles = { ...DEFAULT_STYLES, ...template.styles };
         set((s) => ({
           templateId: template.id,
           colors: template.colors,
-          styles,
-          layout: reclamp(s.layout, styles),
+          styles: template.styles,
+          // a look that comes with an arrangement rearranges the room too
+          layout: reclamp(template.layout ?? s.layout, template.styles),
+          selected: null,
+          moveMode: false,
         }));
       },
 
@@ -133,38 +147,100 @@ export const useDesignStore = create<DesignStore>()(
           return { styles, layout: reclamp(s.layout, styles), templateId: "custom" };
         }),
 
-      // picking something new always leaves move switched off
       select: (id) => set({ selected: id, moveMode: false }),
       setDragging: (value) => set({ dragging: value }),
 
       moveItem: (id, x, y) =>
-        set((s) => ({
-          layout: { ...s.layout, [id]: clampTransform(id, { ...s.layout[id], x, y }, s.styles) },
-        })),
+        set((s) => {
+          const item = s.layout[id];
+          if (!item) return {};
+          return { layout: { ...s.layout, [id]: clampItem({ ...item, x, y }, s.styles) } };
+        }),
 
       rotateItem: (id, deltaDeg) =>
         set((s) => {
-          const current = s.layout[id];
-          const rot = (((current.rot + deltaDeg) % 360) + 360) % 360;
-          return { layout: { ...s.layout, [id]: clampTransform(id, { ...current, rot }, s.styles) } };
+          const item = s.layout[id];
+          if (!item) return {};
+          const rot = (((item.rot + deltaDeg) % 360) + 360) % 360;
+          return { layout: { ...s.layout, [id]: clampItem({ ...item, rot }, s.styles) } };
         }),
 
       nudgeItem: (id, dx, dy) =>
         set((s) => {
-          const current = s.layout[id];
-          const next: Transform = { ...current, x: current.x + dx, y: current.y + dy };
-          return { layout: { ...s.layout, [id]: clampTransform(id, next, s.styles) } };
+          const item = s.layout[id];
+          if (!item) return {};
+          return {
+            layout: { ...s.layout, [id]: clampItem({ ...item, x: item.x + dx, y: item.y + dy }, s.styles) },
+          };
         }),
 
-      resetLayout: () => set((s) => ({ layout: reclamp(DEFAULT_LAYOUT, s.styles) })),
-      resetAll: () => set({ ...INITIAL, selected: null, moveMode: false }),
-      load: (snapshot) =>
-        set({
-          ...snapshot,
-          layout: reclamp(snapshot.layout, snapshot.styles),
+      setItemWidth: (id, w) =>
+        set((s) => {
+          const item = s.layout[id];
+          if (!item || !isShelf(item.kind)) return {};
+          return { layout: { ...s.layout, [id]: clampItem({ ...item, w }, s.styles) }, templateId: "custom" };
+        }),
+
+      setItemHeight: (id, z) =>
+        set((s) => {
+          const item = s.layout[id];
+          if (!item || item.kind !== "wallShelf") return {};
+          return { layout: { ...s.layout, [id]: clampItem({ ...item, z }, s.styles) } };
+        }),
+
+      addItem: (kind) =>
+        set((s) => {
+          const probe: PlacedItem = {
+            kind,
+            x: 0,
+            y: 0,
+            rot: 0,
+            w: isShelf(kind) ? DEFAULT_SHELF_WIDTH : undefined,
+            z: kind === "wallShelf" ? DEFAULT_WALL_SHELF_Z : undefined,
+          };
+          const spot = findFreeSpot(probe, s.layout, s.styles);
+          const id = newId(kind, s.layout);
+          return {
+            layout: { ...s.layout, [id]: clampItem({ ...probe, ...spot }, s.styles) },
+            selected: id,
+            // ready to be dragged straight into place
+            moveMode: true,
+            templateId: "custom",
+          };
+        }),
+
+      /** Adds a group of wall shelves on the wall to the right of the bed. */
+      addShelfPattern: (patternId) =>
+        set((s) => {
+          const pattern = SHELF_PATTERNS.find((p) => p.id === patternId);
+          if (!pattern) return {};
+          const layout = { ...s.layout };
+          let firstId: string | null = null;
+          pattern.boards.forEach((board, i) => {
+            const id = `wallShelf-p${Date.now().toString(36)}-${i}`;
+            if (!firstId) firstId = id;
+            layout[id] = clampItem(
+              { kind: "wallShelf", x: 389, y: 150 + board.dy, rot: 90, z: board.z, w: board.w },
+              s.styles,
+            );
+          });
+          return { layout, selected: firstId, moveMode: false, templateId: "custom" };
+        }),
+
+      removeItem: (id) =>
+        set((s) => {
+          const layout = { ...s.layout };
+          delete layout[id];
+          return { layout, selected: null, moveMode: false, templateId: "custom" };
+        }),
+
+      resetLayout: () =>
+        set((s) => ({
+          layout: reclamp(templateById(s.templateId)?.layout ?? DEFAULT_LAYOUT, s.styles),
           selected: null,
           moveMode: false,
-        }),
+        })),
+      resetAll: () => set({ ...INITIAL, selected: null, moveMode: false }),
       snapshot: () => {
         const { templateId, colors, styles, layout } = get();
         return { templateId, colors, styles, layout };
@@ -185,7 +261,7 @@ export const useDesignStore = create<DesignStore>()(
           templateId: p.templateId ?? INITIAL.templateId,
           colors: { ...INITIAL.colors, ...(p.colors ?? {}) },
           styles: { ...INITIAL.styles, ...(p.styles ?? {}) },
-          layout: { ...DEFAULT_LAYOUT, ...(p.layout ?? {}) },
+          layout: p.layout ? migrateLayout(p.layout) : INITIAL.layout,
         };
         return { ...current, ...source, layout: reclamp(source.layout, source.styles) };
       },

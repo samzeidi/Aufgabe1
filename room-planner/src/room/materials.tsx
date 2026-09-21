@@ -24,7 +24,7 @@ export const REAL = {
   windowFrame: "#1D2020",
   steel: "#A9ACA9",
   bedFrame: "#231C19",
-  sofa: "#B7AC95",
+  sofa: "#4C5B44",
   table: "#C4B59C",
   shelf: "#B08F68",
   door: "#EFEDE7",
@@ -129,13 +129,25 @@ export function createMaterials() {
     leafDark: std({ color: "#3C5537", roughness: 0.75, side: THREE.DoubleSide }),
     pot: std({ color: "#B9A88E", roughness: 0.85 }),
     soil: std({ color: "#3A2F26", roughness: 1 }),
+    shelfBack: std({ color: "#8E7250", roughness: 0.8 }),
+    stem: std({ color: "#5A6B46", roughness: 0.8 }),
     oakLight: std({ color: "#C2A176", roughness: 0.55 }),
     upholstery: std({ color: "#C9BFAE", roughness: 0.9 }),
     brass: std({ color: "#C2A25B", roughness: 0.3, metalness: 0.8 }),
   };
 }
 
-export type Materials = ReturnType<typeof createMaterials>;
+const bookCache = new Map<string, THREE.MeshStandardMaterial>();
+function bookMaterial(color: string) {
+  let m = bookCache.get(color);
+  if (!m) {
+    m = new THREE.MeshStandardMaterial({ color, roughness: 0.85 });
+    bookCache.set(color, m);
+  }
+  return m;
+}
+
+export type Materials = ReturnType<typeof createMaterials> & { book: (color: string) => THREE.MeshStandardMaterial };
 
 const MaterialsContext = createContext<Materials | null>(null);
 
@@ -164,7 +176,7 @@ function ApplyDesignColors({ materials }: { materials: Materials }) {
 }
 
 export function MaterialsProvider({ children }: { children: ReactNode }) {
-  const materials = useMemo(() => createMaterials(), []);
+  const materials = useMemo(() => ({ ...createMaterials(), book: bookMaterial }), []);
   return (
     <MaterialsContext.Provider value={materials}>
       <ApplyDesignColors materials={materials} />

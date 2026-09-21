@@ -1,4 +1,4 @@
-import { ITEM_LABELS } from "../room/design";
+import { KIND_LABELS, SHELF_WIDTHS, isShelf, shelfWidth } from "../room/design";
 import { useDesignStore } from "../store/useDesignStore";
 
 /** Controls for whatever is currently selected. Moving is off until she asks for it. */
@@ -10,33 +10,60 @@ export function SelectionBar() {
   const setMoveMode = useDesignStore((s) => s.setMoveMode);
   const rotateItem = useDesignStore((s) => s.rotateItem);
   const nudgeItem = useDesignStore((s) => s.nudgeItem);
+  const setItemWidth = useDesignStore((s) => s.setItemWidth);
+  const setItemHeight = useDesignStore((s) => s.setItemHeight);
+  const removeItem = useDesignStore((s) => s.removeItem);
 
-  if (!selected) return null;
-  const t = layout[selected];
+  const item = selected ? layout[selected] : undefined;
+  if (!selected || !item) return null;
 
   // while moving, everything gets out of the way so the whole screen can be dragged
   if (moveMode) {
     return (
       <div className="move-banner">
         <span>
-          Moving <b>{ITEM_LABELS[selected]}</b> — drag it anywhere
+          Moving <b>{KIND_LABELS[item.kind]}</b> — drag it anywhere
         </span>
         <button onClick={() => setMoveMode(false)}>Finish</button>
       </div>
     );
   }
 
+  const shelf = isShelf(item.kind);
+  const width = shelfWidth(item);
+
   return (
     <div className="selection-bar">
       <div className="selection-head">
-        <strong>{ITEM_LABELS[selected]}</strong>
+        <strong>{KIND_LABELS[item.kind]}</strong>
         <span className="selection-pos">
-          {Math.round(t.x)} · {Math.round(t.y)} cm · {Math.round(t.rot)}°
+          {Math.round(item.x)} · {Math.round(item.y)} cm · {Math.round(item.rot)}°
         </span>
         <button className="selection-close" onClick={() => select(null)} aria-label="Done">
           ✕
         </button>
       </div>
+
+      {shelf && (
+        <div className="inline-picker">
+          <span>Width</span>
+          {SHELF_WIDTHS.map((w) => (
+            <button key={w} className={w === width ? "active" : ""} onClick={() => setItemWidth(selected, w)}>
+              {w}
+            </button>
+          ))}
+          {!SHELF_WIDTHS.includes(width as 40 | 60 | 80) && <span className="as-measured">{width} cm (measured)</span>}
+        </div>
+      )}
+
+      {item.kind === "wallShelf" && (
+        <div className="inline-picker">
+          <span>Height</span>
+          <button onClick={() => setItemHeight(selected, (item.z ?? 140) - 10)}>−10</button>
+          <span className="value">{Math.round(item.z ?? 140)} cm</span>
+          <button onClick={() => setItemHeight(selected, (item.z ?? 140) + 10)}>+10</button>
+        </div>
+      )}
 
       <button className="move-button" onClick={() => setMoveMode(true)}>
         ✥  Move
@@ -62,7 +89,12 @@ export function SelectionBar() {
         </div>
       </div>
 
-      <p className="selection-hint">Turn it with the arrows, or tap Move to drag it.</p>
+      <div className="selection-footer">
+        <span className="selection-hint">Turn it with the arrows, or tap Move to drag it.</span>
+        <button className="remove-button" onClick={() => removeItem(selected)}>
+          Remove
+        </button>
+      </div>
     </div>
   );
 }

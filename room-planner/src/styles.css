@@ -773,3 +773,98 @@ input[type="range"] {
     bottom: 16px;
   }
 }
+
+/* ---------- adding shelves ---------- */
+
+.add-block {
+  margin-bottom: 18px;
+}
+
+.add-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.add-button {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 12px;
+  border-radius: 13px;
+  background: var(--raised);
+  cursor: pointer;
+}
+
+.add-button strong {
+  font-size: 0.84rem;
+}
+
+.add-button span {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+/* ---------- inline pickers in the selection bar ---------- */
+
+.inline-picker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+}
+
+.inline-picker button {
+  all: unset;
+  min-width: 40px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--raised);
+  color: var(--text);
+  text-align: center;
+  cursor: pointer;
+}
+
+.inline-picker button.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.inline-picker .value {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  min-width: 52px;
+  text-align: center;
+}
+
+.as-measured {
+  font-size: 0.72rem;
+}
+
+.selection-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 9px;
+}
+
+.selection-footer .selection-hint {
+  margin: 0;
+  flex: 1;
+}
+
+.remove-button {
+  all: unset;
+  padding: 8px 13px;
+  border-radius: 10px;
+  background: rgba(190, 80, 70, 0.22);
+  color: #ffb3ab;
+  font-size: 0.78rem;
+  cursor: pointer;
+}

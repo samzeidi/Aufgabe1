@@ -1,9 +1,10 @@
 import { Block } from "./Block";
 import { Movable } from "./Movable";
-import { Rug, PlantTall, PlantSmall } from "./Decor";
+import { Rug } from "./Decor";
+import { Shelf } from "./Shelves";
 import { toWorld } from "../../room/coords";
 import { useMaterials } from "../../room/materials";
-import { footprint, type ItemId } from "../../room/design";
+import { footprint, isShelf, type PlacedItem } from "../../room/design";
 import { useDesignStore } from "../../store/useDesignStore";
 import * as P from "../../room/params";
 
@@ -36,10 +37,11 @@ function Bedding({ w, d, top }: { w: number; d: number; top: number }) {
   );
 }
 
-function Bed() {
+function Bed({ item }: { item: PlacedItem }) {
   const mats = useMaterials();
-  const style = useDesignStore((s) => s.styles.bed);
-  const [w, d] = footprint("bed", useDesignStore((s) => s.styles));
+  const styles = useDesignStore((s) => s.styles);
+  const style = styles.bed;
+  const [w, d] = footprint(item, styles);
 
   if (style === "wood") {
     const frameH = 26;
@@ -141,11 +143,11 @@ function SofaCushionRow({ x0, x1, y0, y1, z, n }: { x0: number; x1: number; y0: 
   );
 }
 
-function Sofa() {
+function Sofa({ item }: { item: PlacedItem }) {
   const mats = useMaterials();
   const styles = useDesignStore((s) => s.styles);
   const style = styles.sofa;
-  const [w, d] = footprint("sofa", styles);
+  const [w, d] = footprint(item, styles);
   const hw = w / 2;
   const hd = d / 2;
 
@@ -293,65 +295,37 @@ function RoundTable() {
   );
 }
 
-function Shelf({ h }: { h: number }) {
-  const mats = useMaterials();
-  const t = 2;
-  const w = P.SHELF_W;
-  const d = P.SHELF_D;
-  const boards = h > 90 ? [0, h / 3, (2 * h) / 3, h - t] : [0, h / 2, h - t];
-  return (
-    <group>
-      <Block min={[-w / 2, -d / 2, 0]} size={[t, d, h]} material={mats.shelf} radius={0.2} />
-      <Block min={[w / 2 - t, -d / 2, 0]} size={[t, d, h]} material={mats.shelf} radius={0.2} />
-      {boards.map((z) => (
-        <Block key={z} min={[-w / 2 + t, -d / 2, z]} size={[w - 2 * t, d, t]} material={mats.shelf} radius={0.2} />
-      ))}
-    </group>
-  );
+/** Draws whatever kind an item is. */
+function Piece({ item }: { item: PlacedItem }) {
+  if (isShelf(item.kind)) return <Shelf item={item} />;
+  switch (item.kind) {
+    case "bed":
+      return <Bed item={item} />;
+    case "sofa":
+      return <Sofa item={item} />;
+    case "table":
+      return <RoundTable />;
+    case "rug":
+      return <Rug />;
+    default:
+      return null;
+  }
 }
 
-const SHELF_HEIGHTS: Record<string, number> = {
-  shelfBedside: 75,
-  shelfCorner: 75,
-  shelfWindow: 100,
-  shelfKitchen: 100,
-};
-
 export function Furnishings() {
-  const styles = useDesignStore((s) => s.styles);
-  const shelves: ItemId[] = ["shelfBedside", "shelfCorner", "shelfWindow", "shelfKitchen"];
+  const layout = useDesignStore((s) => s.layout);
+  const rugStyle = useDesignStore((s) => s.styles.rug);
 
   return (
     <group>
-      {styles.rug !== "none" && (
-        <Movable id="rug">
-          <Rug />
-        </Movable>
-      )}
-      <Movable id="bed">
-        <Bed />
-      </Movable>
-      <Movable id="sofa">
-        <Sofa />
-      </Movable>
-      <Movable id="table">
-        <RoundTable />
-      </Movable>
-      {shelves.map((id) => (
-        <Movable key={id} id={id}>
-          <Shelf h={SHELF_HEIGHTS[id]} />
-        </Movable>
-      ))}
-      {styles.plants && (
-        <>
-          <Movable id="plantWindow">
-            <PlantTall />
+      {Object.entries(layout).map(([id, item]) => {
+        if (item.kind === "rug" && rugStyle === "none") return null;
+        return (
+          <Movable key={id} id={id}>
+            <Piece item={item} />
           </Movable>
-          <Movable id="plantCorner">
-            <PlantSmall />
-          </Movable>
-        </>
-      )}
+        );
+      })}
     </group>
   );
 }

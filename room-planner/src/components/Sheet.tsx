@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRoomStore } from "../store/useRoomStore";
 import { useDesignStore, encodeDesign } from "../store/useDesignStore";
 import { COLOR_LABELS, TEMPLATES } from "../room/palettes";
-import type { DesignColors } from "../room/design";
+import { ADDABLE, SHELF_PATTERNS, type DesignColors } from "../room/design";
 
 type Tab = "looks" | "colours" | "stuff" | "list";
 
@@ -82,6 +82,8 @@ export function Sheet() {
   const applyTemplate = useDesignStore((s) => s.applyTemplate);
   const setColor = useDesignStore((s) => s.setColor);
   const setStyle = useDesignStore((s) => s.setStyle);
+  const addItem = useDesignStore((s) => s.addItem);
+  const addShelfPattern = useDesignStore((s) => s.addShelfPattern);
   const resetLayout = useDesignStore((s) => s.resetLayout);
   const resetAll = useDesignStore((s) => s.resetAll);
   const snapshot = useDesignStore((s) => s.snapshot);
@@ -284,9 +286,34 @@ export function Sheet() {
                   Tile stickers go straight over the existing tiles and peel off again — the colours are under
                   <b> Colours → Splashback</b>.
                 </p>
+                <div className="add-block">
+                  <span className="picker-label">Add a shelf</span>
+                  <div className="add-grid">
+                    {ADDABLE.map((a) => (
+                      <button key={a.kind} className="add-button" onClick={() => addItem(a.kind)}>
+                        <strong>+ {a.label}</strong>
+                        <span>{a.note}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <span className="picker-label">…or a whole set on the wall beside the bed</span>
+                  <div className="add-grid">
+                    {SHELF_PATTERNS.map((p) => (
+                      <button key={p.id} className="add-button" onClick={() => addShelfPattern(p.id)}>
+                        <strong>+ {p.label}</strong>
+                        <span>{p.note}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="hint">
+                    Each shelf can be 40, 60 or 80 cm wide — tap it in the room to change the width, the height or to
+                    remove it again.
+                  </p>
+                </div>
+
                 <div className="switch-list">
                   <label>
-                    <span>Plants</span>
+                    <span>Plants on the shelves</span>
                     <input type="checkbox" checked={styles.plants} onChange={() => setStyle("plants", !styles.plants)} />
                   </label>
                   <label>

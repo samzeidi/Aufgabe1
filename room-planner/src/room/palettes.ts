@@ -1,4 +1,10 @@
-import type { DesignColors, DesignStyles } from "./design";
+import {
+  DEFAULT_LAYOUT,
+  SHELF_WALL_LAYOUT,
+  type DesignColors,
+  type DesignStyles,
+  type Layout,
+} from "./design";
 
 export interface Template {
   id: string;
@@ -7,7 +13,9 @@ export interface Template {
   /** the three chips shown on the card */
   chips: [string, string, string];
   colors: DesignColors;
-  styles: Partial<DesignStyles>;
+  styles: DesignStyles;
+  /** some looks also rearrange the room */
+  layout?: Layout;
 }
 
 const base: DesignStyles = {
@@ -24,65 +32,92 @@ const base: DesignStyles = {
 
 export const DEFAULT_STYLES: DesignStyles = base;
 
+/** The real couch: a natural dark moss green. It stays green in every look. */
+export const SOFA_GREEN = "#4C5B44";
+
+const baseColors: DesignColors = {
+  wall: "#F1EEE5",
+  accentWall: "#F1EEE5",
+  ceiling: "#E2DFD8",
+  sofa: SOFA_GREEN,
+  cushions: "#C9B8A2",
+  bedding: "#E9E5DE",
+  throwBlanket: "#C9BFA9",
+  rug: "#C9B8A2",
+  curtains: "#E6E1D6",
+  art: "#8A907F",
+  tile: "#E8E2D2",
+  tilePattern: "#C6B393",
+};
+
+function t(
+  id: string,
+  name: string,
+  vibe: string,
+  chips: [string, string, string],
+  colors: Partial<DesignColors>,
+  styles: Partial<DesignStyles>,
+  layout?: Layout,
+): Template {
+  return {
+    id,
+    name,
+    vibe,
+    chips,
+    colors: { ...baseColors, ...colors, sofa: SOFA_GREEN },
+    styles: { ...base, ...styles },
+    layout,
+  };
+}
+
 /**
- * Ten green-and-brown looks. Colours are taken from the mood boards
- * (the "cosy autumn" card gives #6B7A64 · #8A907F · #E6D8C9 · #A67A52 ·
- * #3E4639 · #C9B8A2) and kept in that family.
+ * Green-and-brown looks built on the mood boards (the "cosy autumn" card gives
+ * #6B7A64 · #8A907F · #E6D8C9 · #A67A52 · #3E4639 · #C9B8A2). Every one keeps
+ * the real moss-green couch; they differ in the walls, textiles and tiles.
+ * The ones marked "shelf wall" also move the bed left and put a shelf against
+ * the wall beside it.
  */
 export const TEMPLATES: Template[] = [
-  {
-    id: "as-is",
-    name: "As it is now",
-    vibe: "The real flat, untouched — white walls, your own furniture.",
-    chips: ["#F1EEE5", "#B7AC95", "#C6A88B"],
-    colors: {
-      wall: "#F1EEE5",
-      accentWall: "#F1EEE5",
-      ceiling: "#E2DFD8",
-      sofa: "#B7AC95",
-      cushions: "#9E937E",
-      bedding: "#E9E5DE",
-      throwBlanket: "#C9BFA9",
-      rug: "#C9B8A2",
-      curtains: "#E6E1D6",
-      art: "#8A907F",
-      tile: "#E8E2D2",
-      tilePattern: "#C6B393",
-    },
-    styles: { ...base, backsplash: "original", borderRow: "keep", accentWall: false, rug: "none", curtains: "none", plants: false, art: false },
-  },
-  {
-    id: "cosy-autumn",
-    name: "Cosy Autumn Sage",
-    vibe: "The mood-board palette: sage walls, cognac sofa, cream bedding.",
-    chips: ["#8A907F", "#A67A52", "#E6D8C9"],
-    colors: {
+  t(
+    "as-is",
+    "As it is now",
+    "The real flat, untouched — white walls, your own moss-green couch.",
+    ["#F1EEE5", SOFA_GREEN, "#C6A88B"],
+    {},
+    { accentWall: false, rug: "none", curtains: "none", plants: false, art: false },
+    DEFAULT_LAYOUT,
+  ),
+  t(
+    "cosy-autumn",
+    "Cosy Autumn Sage",
+    "The mood-board palette: sage walls, cream bedding, warm cognac accents.",
+    ["#A9AE9C", SOFA_GREEN, "#A67A52"],
+    {
       wall: "#A9AE9C",
       accentWall: "#6B7A64",
       ceiling: "#EDEAE1",
-      sofa: "#A67A52",
-      cushions: "#3E4639",
+      cushions: "#C9B8A2",
       bedding: "#E6D8C9",
-      throwBlanket: "#C9B8A2",
+      throwBlanket: "#A67A52",
       rug: "#C9B8A2",
       curtains: "#6B7A64",
       art: "#3E4639",
       tile: "#EDE7DA",
       tilePattern: "#6B7A64",
     },
-    styles: { ...base, backsplash: "plain", borderRow: "band", sofa: "loveseat", curtains: "velvet" },
-  },
-  {
-    id: "sage-linen",
-    name: "Sage & Linen",
-    vibe: "Soft and light. Pale sage walls, cream sofa, jute rug.",
-    chips: ["#AFB8A4", "#E3DACB", "#C9B8A2"],
-    colors: {
+    { curtains: "velvet", backsplash: "plain", borderRow: "band" },
+    SHELF_WALL_LAYOUT,
+  ),
+  t(
+    "sage-linen",
+    "Sage & Linen",
+    "Soft and light. Pale sage walls, linen everything, jute underfoot.",
+    ["#C3C9B9", SOFA_GREEN, "#E3DACB"],
+    {
       wall: "#C3C9B9",
       accentWall: "#9AA48D",
       ceiling: "#F2F0E9",
-      sofa: "#E3DACB",
-      cushions: "#8A907F",
+      cushions: "#E3DACB",
       bedding: "#F2EEE5",
       throwBlanket: "#AFB8A4",
       rug: "#CBBBA0",
@@ -91,39 +126,38 @@ export const TEMPLATES: Template[] = [
       tile: "#F0EBE0",
       tilePattern: "#9AA48D",
     },
-    styles: { ...base, backsplash: "metro", borderRow: "hide", sofa: "loveseat" },
-  },
-  {
-    id: "forest-cognac",
-    name: "Forest & Cognac",
-    vibe: "Deep green walls with a tan leather sofa. Warm and dramatic.",
-    chips: ["#3E4639", "#A0623A", "#E8E2D6"],
-    colors: {
+    { backsplash: "metro", borderRow: "hide" },
+  ),
+  t(
+    "forest-brass",
+    "Forest & Brass",
+    "Deep green walls, brass and cognac accents. Warm and dramatic.",
+    ["#4A5344", SOFA_GREEN, "#C2A25B"],
+    {
       wall: "#4A5344",
       accentWall: "#323B2E",
       ceiling: "#E8E6DE",
-      sofa: "#A0623A",
-      cushions: "#26302A",
+      cushions: "#C9B8A2",
       bedding: "#E8E2D6",
-      throwBlanket: "#8B9480",
+      throwBlanket: "#A0623A",
       rug: "#B3A68A",
       curtains: "#3E4639",
-      art: "#C9B8A2",
+      art: "#C2A25B",
       tile: "#E8E2D6",
       tilePattern: "#3E4639",
     },
-    styles: { ...base, backsplash: "metro", borderRow: "hide", sofa: "chesterfield", curtains: "velvet", rug: "persian" },
-  },
-  {
-    id: "moss-sand",
-    name: "Moss & Sand",
-    vibe: "Moss green against warm sand. Plenty of plants.",
-    chips: ["#6F7A52", "#D8C9AE", "#8C7A5E"],
-    colors: {
+    { curtains: "velvet", rug: "persian", backsplash: "metro", borderRow: "hide" },
+    SHELF_WALL_LAYOUT,
+  ),
+  t(
+    "moss-sand",
+    "Moss & Sand",
+    "Moss green against warm sand, with plants trailing off the shelves.",
+    ["#CFC5AC", SOFA_GREEN, "#6F7A52"],
+    {
       wall: "#CFC5AC",
       accentWall: "#6F7A52",
       ceiling: "#F0EDE3",
-      sofa: "#CDBFA6",
       cushions: "#6F7A52",
       bedding: "#F0EADF",
       throwBlanket: "#A8A07E",
@@ -133,60 +167,58 @@ export const TEMPLATES: Template[] = [
       tile: "#E4DAC4",
       tilePattern: "#6F7A52",
     },
-    styles: { ...base, backsplash: "zellige", borderRow: "hide" },
-  },
-  {
-    id: "emerald-walnut",
-    name: "Emerald & Walnut",
-    vibe: "Dark emerald with walnut brown and brass. Evening-ish.",
-    chips: ["#2F4A3F", "#7A4B2A", "#D9CDBA"],
-    colors: {
+    { backsplash: "zellige", borderRow: "hide" },
+    SHELF_WALL_LAYOUT,
+  ),
+  t(
+    "emerald-walnut",
+    "Emerald & Walnut",
+    "Dark emerald with walnut brown and brass. Evening-ish.",
+    ["#3C5A4C", SOFA_GREEN, "#7A4B2A"],
+    {
       wall: "#3C5A4C",
       accentWall: "#26382F",
       ceiling: "#E6E4DC",
-      sofa: "#7A4B2A",
       cushions: "#D9CDBA",
       bedding: "#DED6C7",
-      throwBlanket: "#4F6B5C",
+      throwBlanket: "#7A4B2A",
       rug: "#8C7B63",
       curtains: "#2F4A3F",
       art: "#C2A25B",
       tile: "#DED6C7",
       tilePattern: "#2F4A3F",
     },
-    styles: { ...base, backsplash: "pattern", borderRow: "hide", sofa: "sectional", curtains: "velvet", rug: "persian" },
-  },
-  {
-    id: "terracotta-sage",
-    name: "Terracotta & Sage",
-    vibe: "Sage walls warmed up with terracotta and clay.",
-    chips: ["#B0B79F", "#B4674D", "#E8DCCB"],
-    colors: {
+    { curtains: "velvet", rug: "persian", backsplash: "pattern", borderRow: "hide" },
+  ),
+  t(
+    "terracotta-sage",
+    "Terracotta & Sage",
+    "Sage walls warmed up with terracotta and clay.",
+    ["#BFC5AE", SOFA_GREEN, "#B4674D"],
+    {
       wall: "#BFC5AE",
       accentWall: "#B4674D",
       ceiling: "#F2EFE6",
-      sofa: "#D2A98C",
-      cushions: "#7E8A6E",
+      cushions: "#B4674D",
       bedding: "#F0E8DA",
-      throwBlanket: "#B4674D",
+      throwBlanket: "#C98F6E",
       rug: "#C7A98A",
       curtains: "#E8DCCB",
       art: "#8A5A42",
       tile: "#F0E8DA",
       tilePattern: "#B4674D",
     },
-    styles: { ...base, backsplash: "pattern", borderRow: "hide", sofa: "loveseat" },
-  },
-  {
-    id: "mocha-sage",
-    name: "Mocha & Muted Sage",
-    vibe: "Mocha-mousse neutrals with a quiet sage accent wall.",
-    chips: ["#CDC4B4", "#7A8471", "#6F5B48"],
-    colors: {
+    { backsplash: "pattern", borderRow: "hide" },
+  ),
+  t(
+    "mocha-sage",
+    "Mocha & Muted Sage",
+    "Mocha-mousse neutrals with a quiet sage accent wall.",
+    ["#D3CABA", SOFA_GREEN, "#7A8471"],
+    {
       wall: "#D3CABA",
       accentWall: "#7A8471",
       ceiling: "#F0EDE6",
-      sofa: "#6F5B48",
       cushions: "#C4B49C",
       bedding: "#EDE6DA",
       throwBlanket: "#9CA78E",
@@ -196,39 +228,38 @@ export const TEMPLATES: Template[] = [
       tile: "#EDE6DA",
       tilePattern: "#7A8471",
     },
-    styles: { ...base, backsplash: "plain", borderRow: "band", sofa: "loveseat", rug: "shag" },
-  },
-  {
-    id: "umber-fern",
-    name: "Deep Umber & Fern",
-    vibe: "The moodiest one. Dark umber walls, fern green, candles.",
-    chips: ["#4A4136", "#46543F", "#D8CBB6"],
-    colors: {
+    { rug: "shag", backsplash: "plain", borderRow: "band" },
+  ),
+  t(
+    "umber-fern",
+    "Deep Umber & Fern",
+    "The moodiest one. Dark umber walls, fern green, candlelight.",
+    ["#574C40", SOFA_GREEN, "#46543F"],
+    {
       wall: "#574C40",
       accentWall: "#46543F",
       ceiling: "#DFDBD2",
-      sofa: "#8A6A4A",
       cushions: "#46543F",
       bedding: "#D8CBB6",
-      throwBlanket: "#6E7A5C",
+      throwBlanket: "#8A6A4A",
       rug: "#8A7A60",
       curtains: "#46543F",
       art: "#C2A25B",
       tile: "#D8CBB6",
       tilePattern: "#46543F",
     },
-    styles: { ...base, backsplash: "checker", borderRow: "hide", sofa: "chesterfield", curtains: "velvet", rug: "persian" },
-  },
-  {
-    id: "almond-eucalyptus",
-    name: "Almond & Eucalyptus",
-    vibe: "Bright and airy. Almond walls, eucalyptus green, linen.",
-    chips: ["#E7DFD2", "#9FB0A2", "#C9B8A2"],
-    colors: {
+    { curtains: "velvet", rug: "persian", backsplash: "checker", borderRow: "hide" },
+    SHELF_WALL_LAYOUT,
+  ),
+  t(
+    "almond-eucalyptus",
+    "Almond & Eucalyptus",
+    "Bright and airy. Almond walls, eucalyptus green, lots of linen.",
+    ["#E7DFD2", SOFA_GREEN, "#9FB0A2"],
+    {
       wall: "#E7DFD2",
       accentWall: "#9FB0A2",
       ceiling: "#F4F2EC",
-      sofa: "#DCD3C2",
       cushions: "#9FB0A2",
       bedding: "#F4F1EA",
       throwBlanket: "#B9C4B2",
@@ -238,18 +269,17 @@ export const TEMPLATES: Template[] = [
       tile: "#F4F1EA",
       tilePattern: "#9FB0A2",
     },
-    styles: { ...base, backsplash: "zellige", borderRow: "hide", sofa: "loveseat" },
-  },
-  {
-    id: "olive-cream",
-    name: "Olive & Cream",
-    vibe: "Olive green with cream and light oak. Easy to live with.",
-    chips: ["#7E7F55", "#E3DACB", "#B08F68"],
-    colors: {
+    { backsplash: "zellige", borderRow: "hide" },
+  ),
+  t(
+    "olive-cream",
+    "Olive & Cream",
+    "Olive green with cream and light oak. Easy to live with.",
+    ["#B9B792", SOFA_GREEN, "#7E7F55"],
+    {
       wall: "#B9B792",
       accentWall: "#7E7F55",
       ceiling: "#F1EEE5",
-      sofa: "#E3DACB",
       cushions: "#7E7F55",
       bedding: "#F2EEE4",
       throwBlanket: "#A8A57C",
@@ -259,8 +289,111 @@ export const TEMPLATES: Template[] = [
       tile: "#F2EEE4",
       tilePattern: "#7E7F55",
     },
-    styles: { ...base, backsplash: "checker", borderRow: "hide", bed: "wood" },
-  },
+    { bed: "wood", backsplash: "checker", borderRow: "hide" },
+  ),
+  t(
+    "clay-olive",
+    "Clay & Olive",
+    "Warm clay walls against olive. Earthy, a bit Mediterranean.",
+    ["#C9A78F", SOFA_GREEN, "#6E6B45"],
+    {
+      wall: "#CDAE96",
+      accentWall: "#8C6A55",
+      ceiling: "#F2EDE4",
+      cushions: "#6E6B45",
+      bedding: "#F2E9DC",
+      throwBlanket: "#B4674D",
+      rug: "#C09A78",
+      curtains: "#E6D6C4",
+      art: "#5E5A3C",
+      tile: "#F2E9DC",
+      tilePattern: "#8C6A55",
+    },
+    { rug: "persian", backsplash: "pattern", borderRow: "hide" },
+    SHELF_WALL_LAYOUT,
+  ),
+  t(
+    "oat-fern",
+    "Oat & Fern",
+    "Oat-coloured walls, fern accents, pale wood. Calm and simple.",
+    ["#DFD6C4", SOFA_GREEN, "#6C7D5C"],
+    {
+      wall: "#DFD6C4",
+      accentWall: "#6C7D5C",
+      ceiling: "#F4F1E9",
+      cushions: "#6C7D5C",
+      bedding: "#F4F0E6",
+      throwBlanket: "#BFC7B0",
+      rug: "#CDB99A",
+      curtains: "#EFE8DA",
+      art: "#5C6B4E",
+      tile: "#F4F0E6",
+      tilePattern: "#6C7D5C",
+    },
+    { bed: "wood", backsplash: "metro", borderRow: "hide" },
+  ),
+  t(
+    "pine-cream",
+    "Pine & Cream",
+    "Dark pine green on every wall, cream textiles to lift it.",
+    ["#33453A", SOFA_GREEN, "#EFE7D8"],
+    {
+      wall: "#3B4F42",
+      accentWall: "#2A3830",
+      ceiling: "#E9E6DD",
+      cushions: "#EFE7D8",
+      bedding: "#EFE7D8",
+      throwBlanket: "#B9A98C",
+      rug: "#A8967A",
+      curtains: "#2F4038",
+      art: "#D8CBB6",
+      tile: "#EFE7D8",
+      tilePattern: "#3B4F42",
+    },
+    { curtains: "velvet", backsplash: "zellige", borderRow: "hide" },
+    SHELF_WALL_LAYOUT,
+  ),
+  t(
+    "honey-olive",
+    "Honey & Olive",
+    "Built around the beech kitchen: honey walls, olive textiles, brass.",
+    ["#E0C9A4", SOFA_GREEN, "#737A४7".replace("४", "4")],
+    {
+      wall: "#E2CCA8",
+      accentWall: "#A98A5C",
+      ceiling: "#F4EFE3",
+      cushions: "#737A47",
+      bedding: "#F5EFE2",
+      throwBlanket: "#C2A25B",
+      rug: "#CBAE84",
+      curtains: "#EDDFC6",
+      art: "#6B6B3E",
+      tile: "#F5EFE2",
+      tilePattern: "#A98A5C",
+    },
+    { backsplash: "plain", borderRow: "band" },
+  ),
+  t(
+    "stone-moss",
+    "Stone & Moss",
+    "Cool grey-green stone walls, moss textiles, black frames.",
+    ["#B6B8AE", SOFA_GREEN, "#5A6650"],
+    {
+      wall: "#BCBEB3",
+      accentWall: "#6E7468",
+      ceiling: "#EFEFEA",
+      cushions: "#5A6650",
+      bedding: "#EDEBE3",
+      throwBlanket: "#9AA08E",
+      rug: "#B2A98F",
+      curtains: "#D6D6CB",
+      art: "#3A3F36",
+      tile: "#EDEBE3",
+      tilePattern: "#6E7468",
+    },
+    { backsplash: "checker", borderRow: "hide" },
+    SHELF_WALL_LAYOUT,
+  ),
 ];
 
 export const DEFAULT_TEMPLATE = TEMPLATES[1];
